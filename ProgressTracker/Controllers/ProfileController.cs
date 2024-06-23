@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ProgressTracker.ViewModels;
+using ProgressTracker.ViewModels.ProfileInfo;
 
 namespace ProgressTracker.Controllers;
 

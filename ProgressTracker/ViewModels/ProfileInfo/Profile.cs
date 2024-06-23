@@ -1,4 +1,4 @@
-namespace ProgressTracker.ViewModels;
+namespace ProgressTracker.ViewModels.ProfileInfo;
 
 public class Profile
 {
