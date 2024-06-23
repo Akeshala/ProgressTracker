@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProgressTracker", "ProgressTracker\ProgressTracker.csproj", "{A98AF408-30DF-43D2-87F2-14B2C8B2003F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A98AF408-30DF-43D2-87F2-14B2C8B2003F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A98AF408-30DF-43D2-87F2-14B2C8B2003F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A98AF408-30DF-43D2-87F2-14B2C8B2003F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A98AF408-30DF-43D2-87F2-14B2C8B2003F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
