@@ -8,25 +8,12 @@ public class ProfileController : Controller
     // GET /Profile/
     public IActionResult Index()
     {
-        var user = new User()
-        {
-            Id = 1,
-            Name = "Akeshala",
-            Email = "chavinduakeshala@gmail.com",
-            Age = 27,
-        };
-        
-        var university = new University()
-        {
-            Id = 1,
-            Name = "University of Moratuwa",
-            CourseName = "Electronic and Telecommunication Engineering",
-            Location = "Moratuwa",
-        };
+        var studentUser = Student.Instance();
+        var university = University.Instance();
         var viewModel = new Profile()
         {
             University = university,
-            User = user,
+            Student = studentUser,
         };
         return View(viewModel);
     }

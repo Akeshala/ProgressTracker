@@ -2,6 +2,6 @@ namespace ProgressTracker.ViewModels;
 
 public class Profile
 {
-    public User User { get; set; }
+    public Student Student { get; set; }
     public University University { get; set; }
 }
