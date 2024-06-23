@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Models;
+using System.Text.Encodings.Web;
 
 namespace ProgressTracker.Controllers;
 
@@ -14,11 +15,6 @@ public class HomeController : Controller
     }
 
     public IActionResult Index()
-    {
-        return View();
-    }
-
-    public IActionResult Privacy()
     {
         return View();
     }

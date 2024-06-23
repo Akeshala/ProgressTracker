@@ -1,0 +1,48 @@
+﻿@model ProgressTracker.ViewModels.Profile
+
+@{
+ViewData["Title"] = "Profile";
+}
+
+<style>
+    .profile {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .profile h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .profile strong {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .profile p {
+        margin: 5px 0;
+    }
+</style>
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="profile">
+    <h3>User</h3>
+    <p>
+        <strong>Name:</strong> @Model.User.Name<br>
+        <strong>Email:</strong> @Model.User.Email<br>
+        <strong>Age:</strong> @Model.User.Age<br>
+    </p>
+</div>
+
+<div class="profile">
+    <h3>University</h3>
+    <p>
+        <strong>Name:</strong> @Model.University.Name<br>
+        <strong>Course Name:</strong> @Model.University.CourseName<br>
+        <strong>Location:</strong> @Model.University.Location<br>
+    </p>
+</div>
