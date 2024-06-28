@@ -4,6 +4,26 @@
 ViewData["Title"] = "Profile";
 }
 
+<h1>@ViewData["Title"]</h1>
+
+<div class="profile">
+    <h3>User</h3>
+    <p>
+        <strong>Name:</strong> @Model.StudentViewModal.Name<br>
+        <strong>Email:</strong> @Model.StudentViewModal.Email<br>
+        <strong>Age:</strong> @Model.StudentViewModal.Age<br>
+    </p>
+</div>
+
+<div class="profile">
+    <h3>University</h3>
+    <p>
+        <strong>Name:</strong> @Model.UniversityViewModal.Name<br>
+        <strong>Course Name:</strong> @Model.UniversityViewModal.CourseName<br>
+        <strong>Location:</strong> @Model.UniversityViewModal.Location<br>
+    </p>
+</div>
+
 <style>
     .profile {
         margin-bottom: 20px;
@@ -26,23 +46,3 @@ ViewData["Title"] = "Profile";
         margin: 5px 0;
     }
 </style>
-
-<h1>@ViewData["Title"]</h1>
-
-<div class="profile">
-    <h3>User</h3>
-    <p>
-        <strong>Name:</strong> @Model.StudentViewModal.Name<br>
-        <strong>Email:</strong> @Model.StudentViewModal.Email<br>
-        <strong>Age:</strong> @Model.StudentViewModal.Age<br>
-    </p>
-</div>
-
-<div class="profile">
-    <h3>University</h3>
-    <p>
-        <strong>Name:</strong> @Model.UniversityViewModal.Name<br>
-        <strong>Course Name:</strong> @Model.UniversityViewModal.CourseName<br>
-        <strong>Location:</strong> @Model.UniversityViewModal.Location<br>
-    </p>
-</div>

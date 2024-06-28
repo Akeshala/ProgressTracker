@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ProgressTracker.Models;
+using ProgressTracker.ViewModels;
 
 namespace ProgressTracker.Controllers;
 

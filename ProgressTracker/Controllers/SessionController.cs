@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
-using ProgressTracker.ViewModels.Shared;
+using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
@@ -10,38 +10,46 @@ public class SessionController : Controller
     // GET /Session/
     public IActionResult Index()
     {
-        var viewModel = Session.GetAll();
+        var viewModel = SessionModel.GetAll();
         return View(viewModel);
     }
-    
-    // GET /Session/Create
+
+    // GET /Session/Edit
     [HttpGet]
-    public IActionResult Create()
+    public IActionResult Edit(int id)
     {
         var subjects = SubjectModel.GetAll();
-        var model = new DropdownModel
+        var session = SessionModel.GetOneById(id);
+        var model = new SessionViewModel
         {
-            Options = subjects.Select(subject => new SelectListItem
+            SubjectOptions = subjects.Select(subject => new SelectListItem
             {
                 Value = subject.Id.ToString(),
                 Text = subject.Name,
-            }).ToList()
+            }).ToList(),
+            Hours = session.GetTime().Hours,
+            Minutes = session.GetTime().Minutes,
+            SubjectSelectedValue = session.SubjectId,
         };
         return View(model);
     }
 
-    // Post: Session/Create/
+    // POST: Subject/Edit/{id}
     [HttpPost]
-    public async Task<IActionResult> Create(DropdownModel model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id,
+        [Bind("SubjectSelectedValue,Hours,Minutes")] SessionViewModel? viewModel)
     {
-        var selectedValue = model.SelectedValue;
-        var subject = SubjectModel.GetOneByID(selectedValue);
-        if (subject != null)
+        var session = SessionModel.GetOneById(id);
+        if (viewModel == null || session == null)
         {
-            var newSession = new Session(subject.Id, 1, 30);
-            Session.AddOne(newSession);
-            return RedirectToAction("Index", "Session");
+            return NotFound();
         }
-        return View(model);
+        
+        var hours = viewModel.Hours;
+        var minutes = viewModel.Minutes;
+        session.Time = new TimeSpan(hours, minutes, 0);
+        session.SubjectId = viewModel.SubjectSelectedValue;
+        return RedirectToAction("Index", "DailyRecord");
     }
 }

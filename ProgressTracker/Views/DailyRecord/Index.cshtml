@@ -1,0 +1,59 @@
+﻿@model IEnumerable<ProgressTracker.Models.DailyRecordModel>
+
+@{
+    ViewData["Title"] = "Daily Record List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Target)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Break)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SessionIds)
+        </th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Target)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Break)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SessionIds)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
