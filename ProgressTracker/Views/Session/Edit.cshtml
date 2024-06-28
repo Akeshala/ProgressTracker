@@ -10,7 +10,7 @@ ViewData["Title"] = "Edit Session";
 
 <form method="post" class="mt-4">
     <div class="form-group row mb-3">
-        <label for="dropdown" class="col-sm-2 col-form-label">Select a subject</label>
+        <label class="col-sm-2 col-form-label">Select a subject</label>
         <div class="col-sm-2">
             <select asp-for="SubjectSelectedValue" asp-items="Model.SubjectOptions" class="form-control" required>
                 <option value="@Model.SubjectSelectedValue">-- Please Select --</option>
