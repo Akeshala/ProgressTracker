@@ -1,35 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
-using ProgressTracker.ViewModels.SubjectInfo;
+using ProgressTracker.Models;
 
 namespace ProgressTracker.Controllers;
 
-public class SubjectsController : Controller
+public class SubjectController : Controller
 {
     // GET /Subject/
     public IActionResult Index()
     {
-        var viewModel = Subject.GetAll();
+        var viewModel = SubjectModel.GetAll();
         return View(viewModel);
     }
     
     // GET /Subject/Edit/{id}
     public IActionResult Edit(int id)
     {
-        var viewModel = Subject.GetOneByID(id);
+        var viewModel = SubjectModel.GetOneByID(id);
         return View(viewModel);
     }
     
     // POST: Subject/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Credits")] Subject subject)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Credits")] SubjectModel subjectModel)
     {
-        if (id != subject.Id)
+        if (id != subjectModel.Id)
         {
             return NotFound();
         }
-        Subject.AddSubject(subject);
-        return View(subject);
+        SubjectModel.AddSubject(subjectModel);
+        return RedirectToAction("Index", "Subject");
     }
     
     // POST: Subject/Delete/{id}
@@ -37,8 +37,8 @@ public class SubjectsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        Subject.RemoveSubject(id);
-        return RedirectToAction("Index", "Subjects");
+        SubjectModel.RemoveSubject(id);
+        return RedirectToAction("Index", "Subject");
     }
     
     // Get: Subject/Delete/{id}
@@ -56,7 +56,7 @@ public class SubjectsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        Subject.RemoveSubject(id);
+        SubjectModel.RemoveSubject(id);
         return RedirectToAction(nameof(Index));
     }
     
@@ -69,13 +69,13 @@ public class SubjectsController : Controller
 
     // Post: Subject/Create/
     [HttpPost]
-    public async Task<IActionResult> Create(Subject subject)
+    public async Task<IActionResult> Create(SubjectModel subjectModel)
     {
         if (ModelState.IsValid)
         {
-            Subject.AddSubject(subject);
-            return RedirectToAction("Index", "Subjects");
+            SubjectModel.AddSubject(subjectModel);
+            return RedirectToAction("Index", "Subject");
         }
-        return View(subject);
+        return View(subjectModel);
     }
 }

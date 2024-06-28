@@ -1,7 +1,7 @@
-﻿@model ProgressTracker.ViewModels.SubjectInfo.Subject
+﻿@model ProgressTracker.Models.SubjectModel
 
 @{
-ViewData["Title"] = "Edit Subject";
+ViewData["Title"] = "Create a Subject";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -9,9 +9,9 @@ ViewData["Title"] = "Edit Subject";
 
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+            @* <input type="hidden" asp-for="Id" /> *@
             
             <div class="form-group mt-3">
                 <label asp-for="Id" class="control-label"></label>

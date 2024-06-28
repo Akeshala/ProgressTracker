@@ -1,14 +1,14 @@
-namespace ProgressTracker.ViewModels.ProfileInfo;
+namespace ProgressTracker.ViewModels.Profile;
 
-public class University
+public class UniversityViewModal
 {
-    private static University? _instance;
+    private static UniversityViewModal? _instance;
     public int Id { get; set; }
     public string Name { get; set; }
     public string CourseName { get; set; }
     public string? Location { get; set; }
     
-    private University()
+    private UniversityViewModal()
     {
         Id = 0;
         Name = "University of Moratuwa";
@@ -16,11 +16,11 @@ public class University
         Location = "Moratuwa";
     }
     
-    public static University Instance()
+    public static UniversityViewModal Instance()
     {
         if (_instance == null)
         {
-            _instance = new University();
+            _instance = new UniversityViewModal();
         }
         return _instance;
     }

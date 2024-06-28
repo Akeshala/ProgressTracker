@@ -1,4 +1,4 @@
-﻿@model ProgressTracker.ViewModels.ProfileInfo.Profile
+﻿@model ProgressTracker.ViewModels.Profile.ProfileViewModal
 
 @{
 ViewData["Title"] = "Profile";
@@ -32,17 +32,17 @@ ViewData["Title"] = "Profile";
 <div class="profile">
     <h3>User</h3>
     <p>
-        <strong>Name:</strong> @Model.Student.Name<br>
-        <strong>Email:</strong> @Model.Student.Email<br>
-        <strong>Age:</strong> @Model.Student.Age<br>
+        <strong>Name:</strong> @Model.StudentViewModal.Name<br>
+        <strong>Email:</strong> @Model.StudentViewModal.Email<br>
+        <strong>Age:</strong> @Model.StudentViewModal.Age<br>
     </p>
 </div>
 
 <div class="profile">
     <h3>University</h3>
     <p>
-        <strong>Name:</strong> @Model.University.Name<br>
-        <strong>Course Name:</strong> @Model.University.CourseName<br>
-        <strong>Location:</strong> @Model.University.Location<br>
+        <strong>Name:</strong> @Model.UniversityViewModal.Name<br>
+        <strong>Course Name:</strong> @Model.UniversityViewModal.CourseName<br>
+        <strong>Location:</strong> @Model.UniversityViewModal.Location<br>
     </p>
 </div>

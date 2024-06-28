@@ -1,15 +1,15 @@
-namespace ProgressTracker.ViewModels.ProfileInfo;
+namespace ProgressTracker.ViewModels.Profile;
 
-public class Student
+public class StudentViewModal
 {
-    private static Student? _instance;
+    private static StudentViewModal? _instance;
     
     public int Id { get; set; }
     public string Name { get; set; }
     public string? Email { get; set; }
     public int? Age { get; set; }
     
-    private Student()
+    private StudentViewModal()
     {
         Id = 0;
         Name = "Akeshala";
@@ -17,11 +17,11 @@ public class Student
         Age = 27;
     }
     
-    public static Student Instance()
+    public static StudentViewModal Instance()
     {
         if (_instance == null)
         {
-            _instance = new Student();
+            _instance = new StudentViewModal();
         }
         return _instance;
     }

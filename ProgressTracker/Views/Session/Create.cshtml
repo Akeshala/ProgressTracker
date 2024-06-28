@@ -1,0 +1,17 @@
+﻿@model ProgressTracker.ViewModels.Shared.DropdownModel;
+
+@{
+    ViewData["Title"] = "Sessions";
+}
+
+<h2>Select an subject</h2>
+
+<form method="post">
+    <div class="form-group">
+        <label for="dropdown">Select an option</label>
+        <select asp-for="SelectedValue" asp-items="Model.Options" class="form-control">
+            <option value="">-- Please Select --</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

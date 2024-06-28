@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ProgressTracker.ViewModels.ProfileInfo;
+using ProgressTracker.ViewModels.Profile;
 
 namespace ProgressTracker.Controllers;
 
@@ -8,12 +8,12 @@ public class ProfileController : Controller
     // GET /Profile/
     public IActionResult Index()
     {
-        var studentUser = Student.Instance();
-        var university = University.Instance();
-        var viewModel = new Profile()
+        var studentUser = StudentViewModal.Instance();
+        var university = UniversityViewModal.Instance();
+        var viewModel = new ProfileViewModal()
         {
-            University = university,
-            Student = studentUser,
+            UniversityViewModal = university,
+            StudentViewModal = studentUser,
         };
         return View(viewModel);
     }
