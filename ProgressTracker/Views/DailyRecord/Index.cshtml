@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProgressTracker.Models.DailyRecordModel>
+﻿@model IEnumerable<ProgressTracker.ViewModels.DailyRecord.DailyRecordViewModel>
 
 @{
     ViewData["Title"] = "Daily Record List";
@@ -26,7 +26,7 @@
             @Html.DisplayNameFor(model => model.Break)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.SessionIds)
+            @Html.DisplayNameFor(model => model.Covered)
         </th>
         <th>Action</th>
     </tr>
@@ -48,7 +48,7 @@
                 @Html.DisplayFor(modelItem => item.Break)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SessionIds)
+                @Html.DisplayFor(modelItem => item.Covered)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>

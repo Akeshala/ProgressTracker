@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProgressTracker.Models.SessionModel>
+﻿@model IEnumerable<ProgressTracker.ViewModels.Session.SessionViewModel>
 
 @{
     ViewData["Title"] = "Session List";
@@ -13,7 +13,7 @@
             @Html.DisplayNameFor(model => model.Id)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.SubjectId)
+            @Html.DisplayNameFor(model => model.SubjectName)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Time)
@@ -31,7 +31,7 @@
                 @Html.DisplayFor(modelItem => item.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SubjectId)
+                @Html.DisplayFor(modelItem => item.SubjectName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Time)

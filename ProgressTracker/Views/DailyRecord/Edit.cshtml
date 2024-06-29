@@ -19,6 +19,16 @@
     </div>
 
     <div class="form-group row mb-3">
+        <label for="covered" class="col-sm-2 col-form-label">Covered:</label>
+        <div class="col-sm-2">
+            <div class="input-group">
+                <input type="text" id="covered" class="form-control" value="@Model.Covered" readonly>
+                <span class="input-group-text col" style="flex: 0 0 40%;">hours</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row mb-3">
         <label class="col-sm-2 col-form-label">Date:</label>
         <div class="col-sm-2">
             <div class="input-group">
@@ -106,7 +116,7 @@
             @Html.DisplayNameFor(model => model.Sessions[0].Id)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Sessions[0].SubjectId)
+            @Html.DisplayNameFor(model => model.Sessions[0].SubjectName)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Sessions[0].Time)
@@ -121,7 +131,7 @@
             @Html.DisplayFor(modelItem => item.Id)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.SubjectId)
+            @Html.DisplayFor(modelItem => item.SubjectName)
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Time)

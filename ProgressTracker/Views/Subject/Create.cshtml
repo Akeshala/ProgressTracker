@@ -1,4 +1,4 @@
-﻿@model ProgressTracker.Models.SubjectModel
+﻿@model ProgressTracker.ViewModels.Subject.SubjectViewModel
 
 @{
 ViewData["Title"] = "Create a Subject";
@@ -11,35 +11,29 @@ ViewData["Title"] = "Create a Subject";
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @* <input type="hidden" asp-for="Id" /> *@
-            
-            <div class="form-group mt-3">
-                <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" />
-                <span asp-validation-for="Id" class="text-danger"></span>
-            </div>
             
             <div class="form-group mt-3">
                 <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <input asp-for="Name" class="form-control" required/>
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             
             <div class="form-group mt-3">
                 <label asp-for="Credits" class="control-label"></label>
-                <input asp-for="Credits" class="form-control" />
+                <input asp-for="Credits" class="form-control" required/>
                 <span asp-validation-for="Credits" class="text-danger"></span>
             </div>
-            
-            <div class="form-group mt-3">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            <div class="form-group mt-3 row">
+                <div class="col-auto">
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+                <div class="col-auto">
+                    <a asp-action="Index" class="btn btn-link">Back to List</a>
+                </div>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

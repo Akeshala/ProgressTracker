@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ProgressTracker.Models;
+using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.ViewModels.DailyRecord;
 public class EditDailyRecordViewModel
@@ -14,5 +14,6 @@ public class EditDailyRecordViewModel
     public List<SelectListItem> SubjectOptions { get; set; }
     public int SubjectHours { get; set; }
     public int SubjectMinutes { get; set; }
-    public List<SessionModel> Sessions { get; set; }
+    public TimeSpan Covered { get; set; }
+    public List<SessionViewModel> Sessions { get; set; }
 }

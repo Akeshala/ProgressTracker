@@ -10,7 +10,15 @@ public class SessionController : Controller
     // GET /Session/
     public IActionResult Index()
     {
-        var viewModel = SessionModel.GetAll();
+        var sessions = SessionModel.GetAll();
+            
+        var viewModel = sessions.Select(session => new SessionViewModel
+        {
+            SubjectName = SubjectModel.GetOneByID(session.SubjectId).Name,
+            Time = session.Time,
+            Id = session.Id,
+        }).ToList();
+        
         return View(viewModel);
     }
 
@@ -20,7 +28,7 @@ public class SessionController : Controller
     {
         var subjects = SubjectModel.GetAll();
         var session = SessionModel.GetOneById(id);
-        var model = new SessionViewModel
+        var model = new SessionViewEditModel
         {
             SubjectOptions = subjects.Select(subject => new SelectListItem
             {
@@ -38,7 +46,7 @@ public class SessionController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id,
-        [Bind("SubjectSelectedValue,Hours,Minutes")] SessionViewModel? viewModel)
+        [Bind("SubjectSelectedValue,Hours,Minutes")] SessionViewEditModel? viewModel)
     {
         var session = SessionModel.GetOneById(id);
         if (viewModel == null || session == null)

@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
 using ProgressTracker.ViewModels.DailyRecord;
+using System.Collections.Generic;
+using System.Linq;
+using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
@@ -10,7 +13,16 @@ public class DailyRecordController : Controller
     // GET /DailyRecord/
     public IActionResult Index()
     {
-        var viewModel = DailyRecordModel.GetAll();
+        var dailyRecords = DailyRecordModel.GetAll();
+        var viewModel = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
+        {
+            Id = dailyRecord.Id,
+            Date = dailyRecord.Date,
+            Target = dailyRecord.Target,
+            Break = dailyRecord.Break,
+            Covered = SessionModel.GetMultiByIds(dailyRecord.SessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time),
+        }).ToList();
         return View(viewModel);
     }
 
@@ -92,7 +104,14 @@ public class DailyRecordController : Controller
                 Value = subject.Id.ToString(),
                 Text = subject.Name,
             }).ToList(),
-            Sessions = SessionModel.GetMultiByIds(sessionIds),
+            Sessions = SessionModel.GetMultiByIds(sessionIds).Select(session => new SessionViewModel
+            {
+                SubjectName = SubjectModel.GetOneByID(session.SubjectId).Name,
+                Time = session.Time,
+                Id = session.Id,
+            }).ToList(),
+            Covered = SessionModel.GetMultiByIds(dailyRecord.SessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time),
         };
         return View(model);
     }
@@ -111,12 +130,12 @@ public class DailyRecordController : Controller
         {
             return NotFound();
         }
-        
+
         // edit breaks
         dailyRecord.Break = new TimeSpan(viewModel.BreakHours, viewModel.BreakMinutes, 0);
         dailyRecord.Date = new DateTime(viewModel.Year, viewModel.Month, viewModel.Day);
         dailyRecord.Date = new DateTime(viewModel.Year, viewModel.Month, viewModel.Day);
-        
+
         // add session if available
         var subjectSelectedValue = viewModel.SubjectSelectedValue;
         var subject = SubjectModel.GetOneByID(subjectSelectedValue);
@@ -128,7 +147,7 @@ public class DailyRecordController : Controller
             SessionModel.AddOne(newSession);
             dailyRecord.AddOneSessionId(newSession.Id);
         }
-        
+
         return RedirectToAction("Edit", "DailyRecord", id);
     }
 }

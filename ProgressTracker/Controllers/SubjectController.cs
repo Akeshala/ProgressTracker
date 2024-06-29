@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Models;
+using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Controllers;
 
@@ -64,18 +65,20 @@ public class SubjectController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        return View();
+        var model = new SubjectViewModel { };
+        return View(model);
     }
 
     // Post: Subject/Create/
     [HttpPost]
-    public async Task<IActionResult> Create(SubjectModel subjectModel)
+    public async Task<IActionResult> Create(SubjectViewModel? viewModel)
     {
-        if (ModelState.IsValid)
+        if (ModelState.IsValid && viewModel != null)
         {
+            var subjectModel = new SubjectModel(viewModel.Name, viewModel.Credits);
             SubjectModel.AddSubject(subjectModel);
             return RedirectToAction("Index", "Subject");
         }
-        return View(subjectModel);
+        return View(viewModel);
     }
 }
