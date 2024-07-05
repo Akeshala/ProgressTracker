@@ -1,102 +1,130 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
+using ProgressTracker.Services;
 using ProgressTracker.ViewModels.DailyRecord;
-using System.Collections.Generic;
-using System.Linq;
 using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
 public class DailyRecordController : Controller
 {
+    
+    private readonly ISubjectService _subjectService;
+    public DailyRecordController(ISubjectService subjectService)
+    {
+        _subjectService = subjectService;
+    }
+    
     // GET /DailyRecord/
     public IActionResult Index()
     {
         var dailyRecords = DailyRecordModel.GetAll();
         var viewModel = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
         {
-            Id = dailyRecord.Id,
-            Date = dailyRecord.Date,
-            Target = dailyRecord.Target,
-            Break = dailyRecord.Break,
-            Covered = SessionModel.GetMultiByIds(dailyRecord.SessionIds)
-                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time),
+            DailyRecordModel = dailyRecord,
+            Learned = dailyRecord.GetLearned(),
         }).ToList();
         return View(viewModel);
     }
 
     // GET /DailyRecord/Create
-    [HttpGet]
     public IActionResult Create()
     {
-        var subjects = SubjectModel.GetAll();
+        var subjects = _subjectService.GetAll();
         var model = new AddDailyRecordViewModel
         {
-            DailyTarget = DailyRecordModel.DailyTarget,
             SubjectOptions = subjects.Select(subject => new SelectListItem
             {
                 Value = subject.Id.ToString(),
                 Text = subject.Name,
             }).ToList(),
+            DailyRecord = new DailyRecordModel(),
         };
         return View(model);
     }
 
     // Post: DailyRecord/Create/
     [HttpPost]
-    public async Task<IActionResult> Create(AddDailyRecordViewModel viewModel)
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(AddDailyRecordViewModel viewModel)
     {
-        var year = viewModel.Year;
-        var month = viewModel.Month;
-        var day = viewModel.Day;
-
-        // early return if date is not selected
-        if (year == 0 || month == 0 || day == 0) return View(viewModel);
-
-        // create record with date
-        var dailyRecord = new DailyRecordModel(year, month, day);
-
-        // add breaks
-        var breakHours = viewModel.BreakHours;
-        var breakMinutes = viewModel.BreakMinutes;
-        if (!(breakHours == 0 && breakMinutes == 0))
+        if (!ModelState.IsValid)
         {
-            dailyRecord.Break = new TimeSpan(breakHours, breakMinutes, 0);
+            return NotFound();
         }
 
-        // add session if available
-        var subjectSelectedValue = viewModel.SubjectSelectedValue;
-        var subject = SubjectModel.GetOneByID(subjectSelectedValue);
-        var subjectHours = viewModel.SubjectHours;
-        var subjectMinutes = viewModel.SubjectMinutes;
-        if (subject != null && !(subjectHours == 0 && subjectMinutes == 0))
+        var dailyRecord = viewModel.DailyRecord;
+
+        // validate and set break time
+        var breakHours = viewModel.BreakHours ?? 0;
+        var breakMinutes = viewModel.BreakMinutes ?? 0;
+        if (!(breakHours == 0 && breakMinutes == 0))
         {
-            var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
-            SessionModel.AddOne(newSession);
-            dailyRecord.AddOneSessionId(newSession.Id);
+            var breakTimeSpan = new TimeSpan(breakHours!, breakMinutes!, 0);
+            if (breakTimeSpan > dailyRecord.GetTarget())
+            {
+                TempData["Error"] = "Break can not be larger than Target!";
+                var subjects = _subjectService.GetAll();
+                viewModel.SubjectOptions = subjects.Select(subject => new SelectListItem
+                {
+                    Value = subject.Id.ToString(),
+                    Text = subject.Name,
+                }).ToList();
+                return View(viewModel);
+            }
+            dailyRecord.Break = breakTimeSpan;
+        }
+
+        // add a session if available
+        var subjectSelectedValue = viewModel.SubjectSelectedValue;
+        if (subjectSelectedValue != null)
+        {
+            var subjectId = (int) subjectSelectedValue;
+            var subject = _subjectService.GetOneById(subjectId);
+            var subjectHours = viewModel.SubjectHours ?? 0;
+            var subjectMinutes = viewModel.SubjectMinutes ?? 0;
+            if (subject != null && !(subjectHours == 0 && subjectMinutes == 0))
+            {
+                var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
+                if (newSession.Time + dailyRecord.Break > dailyRecord.Target)
+                {
+                    TempData["Error"] = "Break and Session durations can not be larger than daily target!";
+                    var subjects = _subjectService.GetAll();
+                    viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
+                    {
+                        Value = sbj.Id.ToString(),
+                        Text = sbj.Name,
+                    }).ToList();
+                    return View(viewModel);
+                }
+
+                SessionModel.AddOne(newSession);
+                dailyRecord.AddOneSessionId(newSession.Id);
+            }
         }
 
         DailyRecordModel.AddOne(dailyRecord);
-        return RedirectToAction("Edit", "DailyRecord", new { id = dailyRecord.Id });
+        return RedirectToAction("Index", "DailyRecord");
     }
 
     // GET /DailyRecord/Edit/{id}
     public IActionResult Edit(int id)
     {
-        var subjects = SubjectModel.GetAll();
+        var subjects = _subjectService.GetAll();
         var dailyRecord = DailyRecordModel.GetOneById(id);
 
-        var date = dailyRecord.GetDate();
+        if (dailyRecord == null)
+        {
+            return NotFound();
+        }
+        
         var breakTime = dailyRecord.GetBreak();
-        var targetTime = dailyRecord.GetTarget();
         var sessionIds = dailyRecord.SessionIds;
         var model = new EditDailyRecordViewModel
         {
-            DailyTarget = targetTime.Hours,
-            Year = date.Year,
-            Month = date.Month,
-            Day = date.Day,
+            DailyRecord = dailyRecord,
+            Learned = dailyRecord.GetLearned(),
             BreakHours = breakTime.Hours,
             BreakMinutes = breakTime.Minutes,
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -104,14 +132,16 @@ public class DailyRecordController : Controller
                 Value = subject.Id.ToString(),
                 Text = subject.Name,
             }).ToList(),
-            Sessions = SessionModel.GetMultiByIds(sessionIds).Select(session => new SessionViewModel
+            Sessions = SessionModel.GetMultiByIds(sessionIds).Select(session =>
             {
-                SubjectName = SubjectModel.GetOneByID(session.SubjectId).Name,
-                Time = session.Time,
-                Id = session.Id,
+                var subject = _subjectService.GetOneById(session.SubjectId);
+                return new SessionViewModel
+                {
+                    SubjectName = subject?.Name ?? "Unknown",
+                    Time = session.Time,
+                    Id = session.Id,
+                };
             }).ToList(),
-            Covered = SessionModel.GetMultiByIds(dailyRecord.SessionIds)
-                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time),
         };
         return View(model);
     }
@@ -119,35 +149,97 @@ public class DailyRecordController : Controller
     // POST: DailyRecord/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(
-        int id,
-        [Bind("DailyTarget,Year,Month,Day,BreakHours,BreakMinutes,SubjectSelectedValue,SubjectHours,SubjectMinutes")]
-        EditDailyRecordViewModel? viewModel
-    )
+    public async Task<IActionResult> Edit(int id, EditDailyRecordViewModel viewModel)
     {
+        if (!ModelState.IsValid)
+        {
+            return NotFound();
+        }
+        
+        var newDailyRecord = viewModel.DailyRecord;
         var dailyRecord = DailyRecordModel.GetOneById(id);
-        if (viewModel == null || dailyRecord == null)
+        if (dailyRecord == null)
         {
             return NotFound();
         }
 
+        // set new date
+        dailyRecord.Date = newDailyRecord.Date;
+
         // edit breaks
-        dailyRecord.Break = new TimeSpan(viewModel.BreakHours, viewModel.BreakMinutes, 0);
-        dailyRecord.Date = new DateTime(viewModel.Year, viewModel.Month, viewModel.Day);
-        dailyRecord.Date = new DateTime(viewModel.Year, viewModel.Month, viewModel.Day);
-
-        // add session if available
-        var subjectSelectedValue = viewModel.SubjectSelectedValue;
-        var subject = SubjectModel.GetOneByID(subjectSelectedValue);
-        var subjectHours = viewModel.SubjectHours;
-        var subjectMinutes = viewModel.SubjectMinutes;
-        if (subject != null && !(subjectHours == 0 && subjectMinutes == 0))
+        var breakHours = viewModel.BreakHours ?? 0;
+        var breakMinutes = viewModel.BreakMinutes ?? 0;
+        if (!(breakHours == 0 && breakMinutes == 0))
         {
-            var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
-            SessionModel.AddOne(newSession);
-            dailyRecord.AddOneSessionId(newSession.Id);
+            var breakTimeSpan = new TimeSpan(breakHours, breakMinutes, 0);
+            if (breakTimeSpan + dailyRecord.GetLearned() > dailyRecord.GetTarget())
+            {
+                ViewData["Error"] = "Adding this Break exceeds daily Target";
+                var subjects = _subjectService.GetAll();
+                viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
+                {
+                    Value = sbj.Id.ToString(),
+                    Text = sbj.Name,
+                }).ToList();
+                viewModel.Sessions = SessionModel.GetMultiByIds(dailyRecord.SessionIds).Select(session =>
+                {
+                    var subject = _subjectService.GetOneById(session.SubjectId);
+                    return new SessionViewModel
+                    {
+                        SubjectName = subject?.Name ?? "Unknown",
+                        Time = session.Time,
+                        Id = session.Id,
+                    };
+                }).ToList();
+                viewModel.Learned = dailyRecord.GetLearned();
+                viewModel.BreakHours = dailyRecord.Break.Hours;
+                viewModel.BreakMinutes = dailyRecord.Break.Minutes;
+                return View(viewModel);
+            }
+    
+            dailyRecord.Break = breakTimeSpan;
         }
-
-        return RedirectToAction("Edit", "DailyRecord", id);
+    
+        // add session if available
+        var subjectSelectedValue = viewModel.SubjectSelectedValue ?? 0;
+        var subject = _subjectService.GetOneById(subjectSelectedValue);
+        if (subject != null)
+        {
+            var subjectHours = viewModel.SubjectHours ?? 0;
+            var subjectMinutes = viewModel.SubjectMinutes ?? 0;
+            if (!(subjectHours == 0 && subjectMinutes == 0))
+            {
+                var sessionTimeSpan = new TimeSpan(subjectHours, subjectMinutes, 0);
+                if (sessionTimeSpan + dailyRecord.GetRecorded() > dailyRecord.GetTarget())
+                {
+                    ViewData["Error"] = "Adding this Session exceeds daily Target";
+                    var subjects = _subjectService.GetAll();
+                    viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
+                    {
+                        Value = sbj.Id.ToString(),
+                        Text = sbj.Name,
+                    }).ToList();
+                    viewModel.Sessions = SessionModel.GetMultiByIds(dailyRecord.SessionIds).Select(session =>
+                    {
+                        var subject = _subjectService.GetOneById(session.SubjectId);
+                        return new SessionViewModel
+                        {
+                            SubjectName = subject?.Name ?? "Unknown",
+                            Time = session.Time,
+                            Id = session.Id,
+                        };
+                    }).ToList();
+                    viewModel.Learned = dailyRecord.GetLearned();
+                    viewModel.BreakHours = dailyRecord.Break.Hours;
+                    viewModel.BreakMinutes = dailyRecord.Break.Minutes;
+                    return View(viewModel);
+                }
+                var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
+                SessionModel.AddOne(newSession);
+                dailyRecord.AddOneSessionId(newSession.Id);
+            }
+        }
+    
+        return RedirectToAction("Edit", "DailyRecord", dailyRecord.Id);
     }
 }

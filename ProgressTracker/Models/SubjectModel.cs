@@ -4,10 +4,7 @@ namespace ProgressTracker.Models;
 
 public class SubjectModel
 {
-    private static Dictionary<int, SubjectModel> _subjects = new Dictionary<int, SubjectModel>();
-    private static int _nextId = 0;
-    
-    public int Id { get; private set; }
+    public int Id { get; set; }
 
     [StringLength(60, MinimumLength = 3)]
     [Required]
@@ -16,36 +13,21 @@ public class SubjectModel
     [Range(1, 10)]
     public int Credits { get; set; }
     
-    public SubjectModel(string name, int credits)
+    [Display(Name = "Learning Hours")]
+    [Range(1, 100)]
+    public int LearningHours { get; set; }
+    
+    public SubjectModel(string name, int credits, int learningHours)
     {
-        Id = GenerateId();
         Name = name;
         Credits = credits;
+        LearningHours = learningHours;
     }
     
-    private static int GenerateId()
-    {
-        return _nextId++;
-    }
+    public SubjectModel() { }
 
-    public static SubjectModel? GetOneByID(int id)
+    public string GetName()
     {
-        _subjects.TryGetValue(id, out SubjectModel? subject);
-        return subject;
-    }
-
-    public static SubjectModel[] GetAll()
-    {
-        return _subjects.Values.ToArray();
-    }
-
-    public static void AddSubject(SubjectModel subjectModel)
-    {
-        _subjects[subjectModel.Id] = subjectModel;
-    }
-
-    public static bool RemoveSubject(int id)
-    {
-        return _subjects.Remove(id);
+        return Name;
     }
 }

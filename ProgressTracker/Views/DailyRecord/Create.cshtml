@@ -12,52 +12,35 @@ ViewData["Title"] = "Add Daily Study Record";
         <label for="dailyTarget" class="col-sm-2 col-form-label">Daily Target:</label>
         <div class="col-sm-2">
             <div class="input-group">
-                <input type="text" id="dailyTarget" class="form-control" value="@Model.DailyTarget" readonly>
+                <input type="text" class="form-control" asp-for="DailyRecord.Target" readonly>
                 <span class="input-group-text col" style="flex: 0 0 40%;">hours</span>
             </div>
         </div>
     </div>
-    
+
     <div class="form-group row mb-3">
         <label class="col-sm-2 col-form-label">Date:</label>
         <div class="col-sm-2">
-            <div class="input-group">
-                <input type="number" id="year" name="year" min="2024" max="9999" class="form-control" required>
-                <span class="input-group-text col" style="flex: 0 0 40%;">year</span>
-            </div>
-        </div>
-        
-        <div class="col-sm-2">
-            <div class="input-group">
-                <input type="number" id="month" name="month" min="1" max="12" class="form-control" required>
-                <span class="input-group-text col" style="flex: 0 0 40%;">month</span>
-            </div>
-        </div>
-        
-        <div class="col-sm-2">
-            <div class="input-group">
-                <input type="number" id="day" name="day" min="1" max="31" class="form-control" required>
-                <span class="input-group-text col" style="flex: 0 0 40%;">day</span>
-            </div>
+            <input asp-for="DailyRecord.Date" class="form-control" type="date" required>
         </div>
     </div>
-    
+
     <div class="form-group row mb-3">
         <label class="col-sm-2 col-form-label">Break:</label>
         <div class="col-sm-2">
             <div class="input-group">
-                <input type="number" id="breakHours" name="breakHours" min="0" max="24" class="form-control">
+                <input type="number" id="BreakHours" name="BreakHours" min="0" max="24" class="form-control">
                 <span class="input-group-text col" style="flex: 0 0 40%;">hours</span>
             </div>
         </div>
         <div class="col-sm-2">
             <div class="input-group">
-                <input type="number" id="breakMinutes" name="breakMinutes" min="0" max="59" class="form-control">
+                <input type="number" id="BreakMinutes" name="BreakMinutes" min="0" max="59" class="form-control">
                 <span class="input-group-text col" style="flex: 0 0 40%;">mins</span>
             </div>
         </div>
     </div>
-    
+
     <p><strong>Add a session</strong></p>
     <div class="form-group row mb-3">
         <label class="col-sm-2 col-form-label">Select a subject:</label>
@@ -66,31 +49,32 @@ ViewData["Title"] = "Add Daily Study Record";
                 <option value="">-- Please Select --</option>
             </select>
         </div>
-        
+    
         <div class="col-sm-2">
             <div class="input-group">
-                <input type="number" id="subjectHours" name="subjectHours" min="0" max="24" class="form-control">
+                <input type="number" id="SubjectHours" name="SubjectHours" min="0" max="24" class="form-control">
                 <span class="input-group-text col" style="flex: 0 0 40%;">hours</span>
             </div>
         </div>
-        
+    
         <div class="col-sm-2">
             <div class="input-group">
-                <input type="number" id="subjectMinutes" name="subjectMinutes" min="0" max="59" class="form-control">
+                <input type="number" id="SubjectMinutes" name="SubjectMinutes" min="0" max="59" class="form-control">
                 <span class="input-group-text col" style="flex: 0 0 40%;">mins</span>
             </div>
         </div>
     </div>
 
+    <div class="row">
+        <p class="text-danger">@TempData["Error"]</p>
+    </div>
 
     <div class="row">
         <div class="col-sm-1">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>
         <div class="col-sm-2">
-            <div>
-                <a asp-action="Index" class="btn btn-link">Back to List</a>
-            </div>
+            <a asp-action="Index" class="btn btn-link">Back to List</a>
         </div>
     </div>
 </form>

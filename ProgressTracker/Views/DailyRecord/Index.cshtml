@@ -14,19 +14,19 @@
     <thead>
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.Id)
+            @Html.DisplayNameFor(model => model.DailyRecordModel.Id)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Date)
+            @Html.DisplayNameFor(model => model.DailyRecordModel.Date)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Target)
+            @Html.DisplayNameFor(model => model.DailyRecordModel.Target)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Break)
+            @Html.DisplayNameFor(model => model.DailyRecordModel.Break)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Covered)
+            @Html.DisplayNameFor(model => model.Learned)
         </th>
         <th>Action</th>
     </tr>
@@ -36,22 +36,22 @@
     {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Id)
+                @Html.DisplayFor(modelItem => item.DailyRecordModel.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Date)
+                @item.DailyRecordModel.Date.ToString("yyyy-MM-dd")
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Target)
+                @Html.DisplayFor(modelItem => item.DailyRecordModel.Target)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Break)
+                @Html.DisplayFor(modelItem => item.DailyRecordModel.Break)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Covered)
+                @Html.DisplayFor(modelItem => item.Learned)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                <a asp-action="Edit" asp-route-id="@item.DailyRecordModel.Id">Edit</a>
             </td>
         </tr>
     }

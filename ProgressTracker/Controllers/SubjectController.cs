@@ -1,35 +1,40 @@
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Models;
+using ProgressTracker.Services;
 using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Controllers;
 
 public class SubjectController : Controller
 {
+    private readonly ISubjectService _subjectService;
+    
+    public SubjectController(ISubjectService subjectService)
+    {
+        _subjectService = subjectService;
+    }
+    
     // GET /Subject/
     public IActionResult Index()
     {
-        var viewModel = SubjectModel.GetAll();
+        var viewModel = _subjectService.GetAll();
         return View(viewModel);
     }
     
     // GET /Subject/Edit/{id}
     public IActionResult Edit(int id)
     {
-        var viewModel = SubjectModel.GetOneByID(id);
+        var viewModel = _subjectService.GetOneById(id);
         return View(viewModel);
     }
     
     // POST: Subject/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Credits")] SubjectModel subjectModel)
+    public async Task<IActionResult> Edit(int id, SubjectModel subjectModel)
     {
-        if (id != subjectModel.Id)
-        {
-            return NotFound();
-        }
-        SubjectModel.AddSubject(subjectModel);
+        subjectModel.Id = id;
+        _subjectService.AddOne(subjectModel);
         return RedirectToAction("Index", "Subject");
     }
     
@@ -38,7 +43,7 @@ public class SubjectController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        SubjectModel.RemoveSubject(id);
+        _subjectService.RemoveOne(id);
         return RedirectToAction("Index", "Subject");
     }
     
@@ -57,8 +62,8 @@ public class SubjectController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        SubjectModel.RemoveSubject(id);
-        return RedirectToAction(nameof(Index));
+        _subjectService.RemoveOne(id);
+        return RedirectToAction("Index", "Subject");
     }
     
     // GET /Subject/Create
@@ -75,8 +80,8 @@ public class SubjectController : Controller
     {
         if (ModelState.IsValid && viewModel != null)
         {
-            var subjectModel = new SubjectModel(viewModel.Name, viewModel.Credits);
-            SubjectModel.AddSubject(subjectModel);
+            var subjectModel = new SubjectModel(viewModel.Name, viewModel.Credits, viewModel.LearningHours);
+            _subjectService.AddOne(subjectModel);
             return RedirectToAction("Index", "Subject");
         }
         return View(viewModel);

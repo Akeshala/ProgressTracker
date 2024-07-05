@@ -3,12 +3,12 @@ namespace ProgressTracker.Models
     public class SessionModel
     {
         private static readonly Dictionary<int, SessionModel> _sessions = new Dictionary<int, SessionModel>();
-        private static int _nextId = 0;
+        private static int _nextId = 1;
         private static readonly object _lock = new object();
         
         public int SubjectId { get; set; }
-        public int Id { get; private set; }
-        public TimeSpan Time;
+        public int Id { get; set; }
+        public TimeSpan Time { get; set; }
 
         public SessionModel(int subjectId, int hours, int minutes)
         {
@@ -79,6 +79,17 @@ namespace ProgressTracker.Models
         public TimeSpan GetTime()
         {
             return Time;
+        }
+        
+        public static void PopulateSessions()
+        {
+            AddOne(new SessionModel(7, 1, 30));
+            AddOne(new SessionModel(1, 2, 45));
+            AddOne(new SessionModel(2, 3, 15));
+            AddOne(new SessionModel(3, 4, 0));
+            AddOne(new SessionModel(4, 5, 30));
+            AddOne(new SessionModel(5, 6, 45));
+            AddOne(new SessionModel(6, 7, 0));
         }
     }
 }

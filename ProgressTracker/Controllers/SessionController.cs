@@ -1,22 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
+using ProgressTracker.Services;
 using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
 public class SessionController : Controller
 {
+    private readonly ISubjectService _subjectService;
+    public SessionController(ISubjectService subjectService)
+    {
+        _subjectService = subjectService;
+    }
+    
     // GET /Session/
     public IActionResult Index()
     {
         var sessions = SessionModel.GetAll();
             
-        var viewModel = sessions.Select(session => new SessionViewModel
+        var viewModel = sessions.Select(session =>
         {
-            SubjectName = SubjectModel.GetOneByID(session.SubjectId).Name,
-            Time = session.Time,
-            Id = session.Id,
+            var subject = _subjectService.GetOneById(session.SubjectId);
+            return new SessionViewModel
+            {
+                SubjectName = subject?.Name ?? "Unknown",
+                Time = session.Time,
+                Id = session.Id,
+            };
         }).ToList();
         
         return View(viewModel);
@@ -26,7 +37,7 @@ public class SessionController : Controller
     [HttpGet]
     public IActionResult Edit(int id)
     {
-        var subjects = SubjectModel.GetAll();
+        var subjects = _subjectService.GetAll();
         var session = SessionModel.GetOneById(id);
         var model = new SessionViewEditModel
         {

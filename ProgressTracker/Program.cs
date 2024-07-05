@@ -1,8 +1,15 @@
+using ProgressTracker.Models;
+using ProgressTracker.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-// builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+
+// initialize classes
+SessionModel.PopulateSessions();
+DailyRecordModel.PopulateDailyRecords();
 
 var app = builder.Build();
 
