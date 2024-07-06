@@ -26,9 +26,27 @@ namespace ProgressTracker.Services
                 AddOne(new SessionModel(1, 2, 45));
                 AddOne(new SessionModel(2, 3, 15));
                 AddOne(new SessionModel(3, 4, 0));
-                AddOne(new SessionModel(4, 5, 30));
-                AddOne(new SessionModel(5, 6, 45));
-                AddOne(new SessionModel(6, 7, 0));
+                AddOne(new SessionModel(4, 3, 30));
+                AddOne(new SessionModel(5, 2, 45));
+                AddOne(new SessionModel(6, 3, 0));
+                AddOne(new SessionModel(1, 3, 30));
+                AddOne(new SessionModel(2, 4, 45));
+                AddOne(new SessionModel(3, 1, 15));
+                AddOne(new SessionModel(4, 0, 0));
+                AddOne(new SessionModel(5, 1, 30));
+                AddOne(new SessionModel(6, 0, 45));
+                AddOne(new SessionModel(7, 1, 0));
+                AddOne(new SessionModel(1, 2, 30));
+                AddOne(new SessionModel(2, 0, 45));
+                AddOne(new SessionModel(3, 1, 15));
+                AddOne(new SessionModel(4, 1, 0));
+                AddOne(new SessionModel(5, 1, 30));
+                AddOne(new SessionModel(6, 2, 45));
+                AddOne(new SessionModel(7, 1, 0));
+                AddOne(new SessionModel(1, 3, 30));
+                AddOne(new SessionModel(2, 2, 45));
+                AddOne(new SessionModel(3, 3, 15));
+                AddOne(new SessionModel(4, 1, 0)); //25
 
                 _initialized = true;
             }

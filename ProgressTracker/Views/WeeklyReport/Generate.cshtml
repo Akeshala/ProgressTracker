@@ -25,6 +25,73 @@
 
 <h4>@TempData["Message"]</h4>
 
+<div class="form-group row mb-3">
+    <label class="col-sm-3 col-form-label">Total Breaks for the week:</label>
+    <div class="col-sm-2">
+        <div class="input-group">
+            <input type="text" id="BreakTime" class="form-control" value="@Model.BreakTime.ToString()" readonly>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-group row mb-3">
+    <label class="col-sm-3 col-form-label">Total Untracked time for the week:</label>
+    <div class="col-sm-2">
+        <div class="input-group">
+            <input type="text" id="UntrackedTime" class="form-control" value="@Model.UntrackedTime.ToString()" readonly>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row mb-3">
+    <label class="col-sm-3 col-form-label">Total Tracked time for the week:</label>
+    <div class="col-sm-2">
+        <div class="input-group">
+            <input type="text" id="TrackedTime" class="form-control" value="@Model.TrackedTime.ToString()" readonly>
+        </div>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.WeeklySubjectReports[0]!.SubjectName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WeeklySubjectReports[0]!.SubjectId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.WeeklySubjectReports[0]!.Learned)
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.WeeklySubjectReports)
+    {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.SubjectName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.SubjectId)
+        </td>
+        <td>
+            @if (@item.Learned.Days > 0)
+            {
+            @string.Format("{0} day(s) {1} hour(s) {2} minute(s)", @item.Learned.Days, @item.Learned.Hours, @item.Learned.Minutes)
+            }
+            else
+            {
+            @string.Format("{0} hour(s) {1} minute(s)", @item.Learned.Hours, @item.Learned.Minutes)
+            }
+        </td>
+    </tr>
+    }
+    </tbody>
+</table>
+
 <style>
     h1 {
         margin-top: 20px;
