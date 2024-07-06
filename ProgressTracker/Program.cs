@@ -1,4 +1,3 @@
-using ProgressTracker.Models;
 using ProgressTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);

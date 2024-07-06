@@ -1,0 +1,87 @@
+﻿@model ProgressTracker.ViewModels.ResultPredictor.ResultPredictorGeneratedViewModel
+
+@{
+    ViewData["Title"] = "Result Predictor";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr/>
+
+<h5>*Predictions are based on the study hours recorded in last 6 months</h5>
+<p>Duration: @Model.FirstDate.ToString("d") - @Model.LastDate.ToString("d")</p>
+
+
+<h2>Predicted results sheet</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.SubjectReports[0]!.SubjectName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SubjectReports[0]!.SubjectId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SubjectReports[0]!.Learned)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SubjectReports[0]!.Target)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.SubjectReports[0]!.Grade)
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.SubjectReports)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubjectName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubjectId)
+            </td>
+            <td>
+                @if (@item.Learned.Days > 0)
+                {
+                    @string.Format("{0} day(s) {1} hour(s) {2} minute(s)", @item.Learned.Days, @item.Learned.Hours, @item.Learned.Minutes)
+                }
+                else
+                {
+                    @string.Format("{0} hour(s) {1} minute(s)", @item.Learned.Hours, @item.Learned.Minutes)
+                }
+            </td>
+            <td>
+                @if (@item.Target.Days > 0)
+                {
+                    @string.Format("{0} day(s) {1} hour(s) {2} minute(s)", @item.Target.Days, @item.Target.Hours, @item.Target.Minutes)
+                }
+                else
+                {
+                    @string.Format("{0} hour(s) {1} minute(s)", @item.Target.Hours, @item.Target.Minutes)
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Grade)
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<style>
+    h1 {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    h5 {
+        margin-bottom: 15px;
+        color: red;
+    }
+    form {
+        margin-top: 20px;
+    }
+</style>
+
