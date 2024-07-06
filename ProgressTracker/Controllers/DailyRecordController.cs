@@ -48,6 +48,26 @@ public class DailyRecordController : Controller
         };
         return View(model);
     }
+    
+    // Get: DailyRecord/Delete/{id}
+    public async Task<IActionResult> Delete(int? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+        return await DeleteConfirmed(id.Value);
+    }
+    
+    // Post: DailyRecord/DeleteConfirmed/{id}
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        _dailyRecordService.RemoveOne(id);
+        TempData["Message"] = "Daily Record deleted successfully.";
+        return RedirectToAction("Index", "DailyRecord");
+    }
 
     // Post: DailyRecord/Create/
     [HttpPost]

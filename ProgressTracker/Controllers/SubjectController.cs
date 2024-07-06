@@ -38,15 +38,6 @@ public class SubjectController : Controller
         return RedirectToAction("Index", "Subject");
     }
     
-    // POST: Subject/Delete/{id}
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
-    {
-        _subjectService.RemoveOne(id);
-        return RedirectToAction("Index", "Subject");
-    }
-    
     // Get: Subject/Delete/{id}
     public async Task<IActionResult> Delete(int? id)
     {

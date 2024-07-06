@@ -55,7 +55,8 @@
                 @Html.DisplayFor(modelItem => item.Learned)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.DailyRecordModel.Id">Edit</a>
+                <a asp-action="Edit" asp-route-id="@item.DailyRecordModel.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.DailyRecordModel.Id">Delete</a>
             </td>
         </tr>
     }
