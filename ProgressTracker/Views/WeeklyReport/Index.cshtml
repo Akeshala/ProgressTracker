@@ -1,0 +1,42 @@
+﻿@model ProgressTracker.ViewModels.WeeklyReport.WeeklyReportViewModel;
+
+@{
+ViewData["Title"] = "Weekly Report Generator";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr/>
+
+<form asp-action="GenerateReport" method="post" class="mt-4">
+    <p><strong>Choose a date from a week for your report</strong></p>
+    <div class="form-group row mb-3">
+        <label class="col-sm-2 col-form-label">Date:</label>
+        <div class="col-sm-2">
+            <input asp-for="Date" class="form-control" type="date" required>
+        </div>
+    </div>
+
+    <div class="form-group row mb-3">
+        <div class="col-sm-4">
+            <button type="submit" class="btn btn-primary">Generate</button>
+        </div>
+    </div>
+</form>
+
+<h4>@TempData["Message"]</h4>
+
+<style>
+    h1 {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    h4 {
+        margin-bottom: 20px;
+    }
+    form {
+        margin-top: 20px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+</style>
