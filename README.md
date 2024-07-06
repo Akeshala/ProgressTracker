@@ -14,3 +14,5 @@ This project was developed as part of the coursework for Enterprise Application 
 ![Screen Shot 2024-07-06 at 1 33 10 PM](https://github.com/Akeshala/ProgressTracker/assets/55060827/05a5b23e-9e92-4b07-b2f6-eb50d7ce9119)
 
 ![Screen Shot 2024-07-06 at 1 33 20 PM](https://github.com/Akeshala/ProgressTracker/assets/55060827/1436f991-6b63-40ef-8aec-a0fcd6bb0ec5)
+
+![Screen Shot 2024-07-06 at 4 48 02 PM](https://github.com/Akeshala/ProgressTracker/assets/55060827/c284ef42-8dc0-47dd-876b-815ab386918c)
