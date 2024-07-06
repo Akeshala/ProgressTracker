@@ -9,15 +9,17 @@ namespace ProgressTracker.Controllers;
 public class SessionController : Controller
 {
     private readonly ISubjectService _subjectService;
-    public SessionController(ISubjectService subjectService)
+    private readonly ISessionService _sessionService;
+    public SessionController(ISubjectService subjectService, ISessionService sessionService)
     {
         _subjectService = subjectService;
+        _sessionService = sessionService;
     }
     
     // GET /Session/
     public IActionResult Index()
     {
-        var sessions = SessionModel.GetAll();
+        var sessions = _sessionService.GetAll();
             
         var viewModel = sessions.Select(session =>
         {
@@ -38,7 +40,7 @@ public class SessionController : Controller
     public IActionResult Edit(int id)
     {
         var subjects = _subjectService.GetAll();
-        var session = SessionModel.GetOneById(id);
+        var session = _sessionService.GetOneById(id);
         var model = new SessionViewEditModel
         {
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -59,7 +61,7 @@ public class SessionController : Controller
     public async Task<IActionResult> Edit(int id,
         [Bind("SubjectSelectedValue,Hours,Minutes")] SessionViewEditModel? viewModel)
     {
-        var session = SessionModel.GetOneById(id);
+        var session = _sessionService.GetOneById(id);
         if (viewModel == null || session == null)
         {
             return NotFound();

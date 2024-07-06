@@ -52,18 +52,6 @@ namespace ProgressTracker.Models
             return Break;
         }
         
-        public TimeSpan GetLearned()
-        {
-            return SessionModel.GetMultiByIds(SessionIds)
-                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time);
-        }
-        
-        public TimeSpan GetRecorded()
-        {
-            return SessionModel.GetMultiByIds(SessionIds)
-                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + Break;
-        }
-        
         public void SetBreak(int breakHours, int breakMinutes)
         {
             Break = new TimeSpan(breakHours, breakMinutes, 0);

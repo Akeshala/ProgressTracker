@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ProgressTracker.Models;
+using ProgressTracker.Services;
 using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.WeeklyReport;
@@ -8,7 +10,18 @@ namespace ProgressTracker.Controllers;
 
 public class WeeklyReportController : Controller
 {
-    
+    private readonly ISubjectService _subjectService;
+    private readonly IDailyRecordService _dailyRecordService;
+    private readonly ISessionService _sessionService;
+
+    public WeeklyReportController(ISubjectService subjectService, IDailyRecordService dailyRecordService,
+        ISessionService sessionService)
+    {
+        _subjectService = subjectService;
+        _dailyRecordService = dailyRecordService;
+        _sessionService = sessionService;
+    }
+
     // GET /WeeklyReport/Index
     [HttpGet]
     public IActionResult Index()
@@ -20,13 +33,31 @@ public class WeeklyReportController : Controller
         return View(viewModel);
     }
 
-    // Post /WeeklyReport/GenerateReport
-    [HttpPost]
-    public IActionResult GenerateReport(WeeklyReportViewModel model)
+    // Get /WeeklyReport/GenerateReport
+    public IActionResult Generate(DateTime date)
     {
-        (DateTime firstDate, DateTime lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(model.Date);
-        TempData["Message"] = "Report generated for the week " 
+        (DateTime firstDate, DateTime lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
+        TempData["Message"] = "Report generated for the week "
                               + firstDate.ToString("yyyy-MM-dd") + " - " + lastDate.ToString("yyyy-MM-dd");
-        return RedirectToAction("Index");
+        var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
+
+        var viewModel = new WeeklyReportGeneratedViewModel
+        {
+            Date = DateTime.Today,
+            DailyRecords = dailyRecords,
+        };
+
+        return View(viewModel);
+    }
+
+    private IEnumerable<WeeklySubjectReportViewModel> GetWeeklySubjectReport(
+        IEnumerable<DailyRecordModel> dailyRecordModels)
+    {
+        foreach (var dailyRecord in dailyRecordModels)
+        {
+            var sessionIds = dailyRecord.SessionIds;
+        }
+
+        return [];
     }
 }

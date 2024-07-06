@@ -7,9 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
-
-// initialize classes
-SessionModel.PopulateSessions();
+builder.Services.AddScoped<ISessionService, SessionService>();
 
 var app = builder.Build();
 
