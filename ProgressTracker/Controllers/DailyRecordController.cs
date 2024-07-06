@@ -113,7 +113,7 @@ public class DailyRecordController : Controller
             }
             
             _dailyRecordService.AddOne(dailyRecord);
-            TempData["Message"] = "Record created successfully";
+            TempData["Message"] = "Record created successfully!";
         }
         catch (Exception ex)
         {
