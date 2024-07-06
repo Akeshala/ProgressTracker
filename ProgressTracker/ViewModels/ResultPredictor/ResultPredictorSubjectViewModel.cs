@@ -16,4 +16,7 @@ public class ResultPredictorSubjectViewModel
     public TimeSpan Target { get; set; }
     
     public string Grade { get; set; }
+    
+    [Display(Name = "Level of knowledge")]
+    public double Level { get; set; }
 }

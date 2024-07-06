@@ -67,20 +67,22 @@ public class ResultPredictorController : Controller
         {
             var subject = _subjectService.GetOneById(kvp.Key);
             var target = new TimeSpan(subject?.LearningHours ?? 0, 0, 0);
+            (string grade, double studyRatio) = GetStudyRatio(kvp.Value, target);
             return new ResultPredictorSubjectViewModel
             {
                 SubjectId = kvp.Key,
                 SubjectName = subject?.Name ?? "Unknown Subject",
                 Learned = kvp.Value,
                 Target = target,
-                Grade = GetStudyRatio(kvp.Value, target),
+                Grade = grade,
+                Level = Math.Round(studyRatio * 100, 2),
             };
         }).ToList();
 
         return subjectReports;
     }
 
-    private string GetStudyRatio(TimeSpan studied, TimeSpan target)
+    private (string grade, double studyRatio) GetStudyRatio(TimeSpan studied, TimeSpan target)
     {
         if (studied > target)
         {
@@ -89,7 +91,7 @@ public class ResultPredictorController : Controller
 
         var studyRatio = studied.TotalSeconds / target.TotalSeconds;
 
-        return studyRatio switch
+        var grade=  studyRatio switch
         {
             >= 0.85 => "A+",
             >= 0.75 => "A",
@@ -103,6 +105,7 @@ public class ResultPredictorController : Controller
             >= 0.35 => "D",
             _ => "F",
         };
+        return (grade, studyRatio);
     }
 
 }
