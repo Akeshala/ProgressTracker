@@ -59,58 +59,67 @@ public class DailyRecordController : Controller
             return NotFound();
         }
 
-        var dailyRecord = viewModel.DailyRecord;
-
-        // validate and set break time
-        var breakHours = viewModel.BreakHours ?? 0;
-        var breakMinutes = viewModel.BreakMinutes ?? 0;
-        if (!(breakHours == 0 && breakMinutes == 0))
+        try
         {
-            var breakTimeSpan = new TimeSpan(breakHours!, breakMinutes!, 0);
-            if (breakTimeSpan > dailyRecord.GetTarget())
-            {
-                TempData["Error"] = "Break can not be larger than Target!";
-                var subjects = _subjectService.GetAll();
-                viewModel.SubjectOptions = subjects.Select(subject => new SelectListItem
-                {
-                    Value = subject.Id.ToString(),
-                    Text = subject.Name,
-                }).ToList();
-                return View(viewModel);
-            }
+            var dailyRecord = viewModel.DailyRecord;
 
-            dailyRecord.Break = breakTimeSpan;
-        }
-
-        // add a session if available
-        var subjectSelectedValue = viewModel.SubjectSelectedValue;
-        if (subjectSelectedValue != null)
-        {
-            var subjectId = (int)subjectSelectedValue;
-            var subject = _subjectService.GetOneById(subjectId);
-            var subjectHours = viewModel.SubjectHours ?? 0;
-            var subjectMinutes = viewModel.SubjectMinutes ?? 0;
-            if (subject != null && !(subjectHours == 0 && subjectMinutes == 0))
+            // validate and set break time
+            var breakHours = viewModel.BreakHours ?? 0;
+            var breakMinutes = viewModel.BreakMinutes ?? 0;
+            if (!(breakHours == 0 && breakMinutes == 0))
             {
-                var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
-                if (newSession.Time + dailyRecord.Break > dailyRecord.Target)
+                var breakTimeSpan = new TimeSpan(breakHours!, breakMinutes!, 0);
+                if (breakTimeSpan > dailyRecord.GetTarget())
                 {
-                    TempData["Error"] = "Break and Session durations can not be larger than daily target!";
+                    TempData["Error"] = "Break can not be larger than Target!";
                     var subjects = _subjectService.GetAll();
-                    viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
+                    viewModel.SubjectOptions = subjects.Select(subject => new SelectListItem
                     {
-                        Value = sbj.Id.ToString(),
-                        Text = sbj.Name,
+                        Value = subject.Id.ToString(),
+                        Text = subject.Name,
                     }).ToList();
                     return View(viewModel);
                 }
 
-                _sessionService.AddOne(newSession);
-                dailyRecord.AddOneSessionId(newSession.Id);
+                dailyRecord.Break = breakTimeSpan;
             }
+
+            // add a session if available
+            var subjectSelectedValue = viewModel.SubjectSelectedValue;
+            if (subjectSelectedValue != null)
+            {
+                var subjectId = (int)subjectSelectedValue;
+                var subject = _subjectService.GetOneById(subjectId);
+                var subjectHours = viewModel.SubjectHours ?? 0;
+                var subjectMinutes = viewModel.SubjectMinutes ?? 0;
+                if (subject != null && !(subjectHours == 0 && subjectMinutes == 0))
+                {
+                    var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
+                    if (newSession.Time + dailyRecord.Break > dailyRecord.Target)
+                    {
+                        TempData["Error"] = "Break and Session durations can not be larger than daily target!";
+                        var subjects = _subjectService.GetAll();
+                        viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
+                        {
+                            Value = sbj.Id.ToString(),
+                            Text = sbj.Name,
+                        }).ToList();
+                        return View(viewModel);
+                    }
+
+                    _sessionService.AddOne(newSession);
+                    dailyRecord.AddOneSessionId(newSession.Id);
+                }
+            }
+            
+            _dailyRecordService.AddOne(dailyRecord);
+            TempData["Message"] = "Record created successfully";
+        }
+        catch (Exception ex)
+        {
+            TempData["Message"] = ex.Message;
         }
 
-        _dailyRecordService.AddOne(dailyRecord);
         return RedirectToAction("Index", "DailyRecord");
     }
 
@@ -249,14 +258,14 @@ public class DailyRecordController : Controller
 
         return RedirectToAction("Edit", "DailyRecord", dailyRecord.Id);
     }
-    
+
     private TimeSpan GetLearned(DailyRecordModel dailyRecord)
     {
         var sessionIds = dailyRecord.SessionIds;
         return _sessionService.GetMultiByIds(sessionIds)
             .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time);
     }
-        
+
     private TimeSpan GetRecorded(DailyRecordModel dailyRecord)
     {
         var sessionIds = dailyRecord.SessionIds;

@@ -123,6 +123,12 @@ namespace ProgressTracker.Services
         {
             if (dailyRecord != null)
             {
+                var existingRecord = GetRecordForDate(dailyRecord.Date);
+                if (existingRecord != null)
+                {
+                    throw new Exception("Duplicate Records found for that day! Edit the existing record.");
+                }
+                
                 if (dailyRecord.Id == 0)
                 {
                     dailyRecord.Id = GenerateUniqueId();
@@ -158,5 +164,13 @@ namespace ProgressTracker.Services
                 .ToArray();
             return dailyRecords;
         }
+        
+        private DailyRecordModel? GetRecordForDate(DateTime date)
+        {
+            var dailyRecord = _dailyRecords.Values
+                .FirstOrDefault(record => record?.Date == date);
+            return dailyRecord;
+        }
+
     }
 }
