@@ -11,15 +11,17 @@ public class DailyRecordController : Controller
 {
     
     private readonly ISubjectService _subjectService;
-    public DailyRecordController(ISubjectService subjectService)
+    private readonly IDailyRecordService _dailyRecordService;
+    public DailyRecordController(ISubjectService subjectService, IDailyRecordService dailyRecordService)
     {
         _subjectService = subjectService;
+        _dailyRecordService = dailyRecordService;
     }
     
     // GET /DailyRecord/
     public IActionResult Index()
     {
-        var dailyRecords = DailyRecordModel.GetAll();
+        var dailyRecords = _dailyRecordService.GetAll();
         var viewModel = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
         {
             DailyRecordModel = dailyRecord,
@@ -104,7 +106,7 @@ public class DailyRecordController : Controller
             }
         }
 
-        DailyRecordModel.AddOne(dailyRecord);
+        _dailyRecordService.AddOne(dailyRecord);
         return RedirectToAction("Index", "DailyRecord");
     }
 
@@ -112,7 +114,7 @@ public class DailyRecordController : Controller
     public IActionResult Edit(int id)
     {
         var subjects = _subjectService.GetAll();
-        var dailyRecord = DailyRecordModel.GetOneById(id);
+        var dailyRecord = _dailyRecordService.GetOneById(id);
 
         if (dailyRecord == null)
         {
@@ -157,7 +159,7 @@ public class DailyRecordController : Controller
         }
         
         var newDailyRecord = viewModel.DailyRecord;
-        var dailyRecord = DailyRecordModel.GetOneById(id);
+        var dailyRecord = _dailyRecordService.GetOneById(id);
         if (dailyRecord == null)
         {
             return NotFound();

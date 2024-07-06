@@ -6,10 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
 
 // initialize classes
 SessionModel.PopulateSessions();
-DailyRecordModel.PopulateDailyRecords();
 
 var app = builder.Build();
 
