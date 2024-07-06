@@ -1,9 +1,8 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Models;
 using ProgressTracker.Services;
 using ProgressTracker.Utils;
-using ProgressTracker.ViewModels;
+using ProgressTracker.ViewModels.DailyRecord;
 using ProgressTracker.ViewModels.WeeklyReport;
 
 namespace ProgressTracker.Controllers;
@@ -48,6 +47,11 @@ public class WeeklyReportController : Controller
         var viewModel = new WeeklyReportGeneratedViewModel
         {
             Date = DateTime.Today,
+            DailyRecords = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
+            {
+                DailyRecordModel = dailyRecord,
+                Learned = GetLearned(dailyRecord),
+            }).ToList(),
             WeeklySubjectReports = weeklySubjectReports.ToList(),
             BreakTime = weeklyBreakTime,
             UntrackedTime = weeklyUntrackedTime,
@@ -159,5 +163,12 @@ public class WeeklyReportController : Controller
         var breakTime = dailyRecord.Break;
         return _sessionService.GetMultiByIds(sessionIds)
             .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime;
+    }
+    
+    private TimeSpan GetLearned(DailyRecordModel dailyRecord)
+    {
+        var sessionIds = dailyRecord.SessionIds;
+        return _sessionService.GetMultiByIds(sessionIds)
+            .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time);
     }
 }

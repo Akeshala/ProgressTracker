@@ -23,7 +23,7 @@
     </div>
 </form>
 
-<h4>@TempData["Message"]</h4>
+<h2>@TempData["Message"]</h2>
 
 <div class="form-group row mb-3">
     <label class="col-sm-3 col-form-label">Total Breaks for the week:</label>
@@ -53,6 +53,8 @@
     </div>
 </div>
 
+<h2>Subject-wise summary</h2>
+
 <table class="table">
     <thead>
     <tr>
@@ -70,22 +72,69 @@
     <tbody>
     @foreach (var item in Model.WeeklySubjectReports)
     {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubjectName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubjectId)
+            </td>
+            <td>
+                @if (@item.Learned.Days > 0)
+                {
+                    @string.Format("{0} day(s) {1} hour(s) {2} minute(s)", @item.Learned.Days, @item.Learned.Hours, @item.Learned.Minutes)
+                }
+                else
+                {
+                    @string.Format("{0} hour(s) {1} minute(s)", @item.Learned.Hours, @item.Learned.Minutes)
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+<h2>Day-wise summary</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.DailyRecords[0].DailyRecordModel.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DailyRecords[0].DailyRecordModel.Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DailyRecords[0].DailyRecordModel.Target)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DailyRecords[0].DailyRecordModel.Break)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DailyRecords[0].Learned)
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.DailyRecords)
+    {
     <tr>
         <td>
-            @Html.DisplayFor(modelItem => item.SubjectName)
+            @Html.DisplayFor(modelItem => item.DailyRecordModel.Id)
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.SubjectId)
+            @item.DailyRecordModel.Date.ToString("yyyy-MM-dd")
         </td>
         <td>
-            @if (@item.Learned.Days > 0)
-            {
-            @string.Format("{0} day(s) {1} hour(s) {2} minute(s)", @item.Learned.Days, @item.Learned.Hours, @item.Learned.Minutes)
-            }
-            else
-            {
-            @string.Format("{0} hour(s) {1} minute(s)", @item.Learned.Hours, @item.Learned.Minutes)
-            }
+            @Html.DisplayFor(modelItem => item.DailyRecordModel.Target)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DailyRecordModel.Break)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Learned)
         </td>
     </tr>
     }
