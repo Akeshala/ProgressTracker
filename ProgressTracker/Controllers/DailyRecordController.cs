@@ -59,14 +59,14 @@ public class DailyRecordController : Controller
         return await DeleteConfirmed(id.Value);
     }
     
-    // Post: DailyRecord/DeleteConfirmed/{id}
+    // Post: DailyRecord/Delete/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public Task<IActionResult> DeleteConfirmed(int id)
     {
         _dailyRecordService.RemoveOne(id);
         TempData["Message"] = "Daily Record deleted successfully.";
-        return RedirectToAction("Index", "DailyRecord");
+        return Task.FromResult<IActionResult>(RedirectToAction("Index", "DailyRecord"));
     }
 
     // Post: DailyRecord/Create/
@@ -184,18 +184,18 @@ public class DailyRecordController : Controller
     // POST: DailyRecord/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, EditDailyRecordViewModel viewModel)
+    public Task<IActionResult> Edit(int id, EditDailyRecordViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-            return NotFound();
+            return Task.FromResult<IActionResult>(NotFound());
         }
 
         var newDailyRecord = viewModel.DailyRecord;
         var dailyRecord = _dailyRecordService.GetOneById(id);
         if (dailyRecord == null)
         {
-            return NotFound();
+            return Task.FromResult<IActionResult>(NotFound());
         }
 
         // set new date
@@ -229,7 +229,7 @@ public class DailyRecordController : Controller
                 viewModel.Learned = GetLearned(dailyRecord);
                 viewModel.BreakHours = dailyRecord.Break.Hours;
                 viewModel.BreakMinutes = dailyRecord.Break.Minutes;
-                return View(viewModel);
+                return Task.FromResult<IActionResult>(View(viewModel));
             }
 
             dailyRecord.Break = breakTimeSpan;
@@ -256,10 +256,10 @@ public class DailyRecordController : Controller
                     }).ToList();
                     viewModel.Sessions = _sessionService.GetMultiByIds(dailyRecord.SessionIds).Select(session =>
                     {
-                        var subject = _subjectService.GetOneById(session.SubjectId);
+                        var sessionSubject = _subjectService.GetOneById(session.SubjectId);
                         return new SessionViewModel
                         {
-                            SubjectName = subject?.Name ?? "Unknown",
+                            SubjectName = sessionSubject?.Name ?? "Unknown",
                             Time = session.Time,
                             Id = session.Id,
                         };
@@ -267,7 +267,7 @@ public class DailyRecordController : Controller
                     viewModel.Learned = GetLearned(dailyRecord);
                     viewModel.BreakHours = dailyRecord.Break.Hours;
                     viewModel.BreakMinutes = dailyRecord.Break.Minutes;
-                    return View(viewModel);
+                    return Task.FromResult<IActionResult>(View(viewModel));
                 }
 
                 var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
@@ -276,7 +276,7 @@ public class DailyRecordController : Controller
             }
         }
 
-        return RedirectToAction("Edit", "DailyRecord", dailyRecord.Id);
+        return Task.FromResult<IActionResult>(RedirectToAction("Edit", "DailyRecord", dailyRecord.Id));
     }
 
     private TimeSpan GetLearned(DailyRecordModel dailyRecord)

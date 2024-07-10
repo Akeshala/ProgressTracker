@@ -61,7 +61,7 @@ public class WeeklyReportController : Controller
     }
 
     private IEnumerable<WeeklySubjectReportViewModel> GetWeeklySubjectReport(
-        IEnumerable<DailyRecordModel?> dailyRecords)
+        IEnumerable<DailyRecordModel> dailyRecords)
     {
         if (!dailyRecords.Any())
         {
@@ -97,7 +97,7 @@ public class WeeklyReportController : Controller
         return weeklySubjectReports;
     }
 
-    private TimeSpan GetWeeklyBreakTime(IEnumerable<DailyRecordModel?> dailyRecords)
+    private TimeSpan GetWeeklyBreakTime(IEnumerable<DailyRecordModel> dailyRecords)
     {
         if (!dailyRecords.Any())
         {

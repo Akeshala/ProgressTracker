@@ -5,10 +5,10 @@ namespace ProgressTracker.Services
 {
     public class DailyRecordService : IDailyRecordService
     {
-        private static readonly Dictionary<int, DailyRecordModel?> _dailyRecords = new Dictionary<int, DailyRecordModel?>();
+        private static readonly Dictionary<int, DailyRecordModel> DailyRecords = new Dictionary<int, DailyRecordModel>();
 
         private static int _nextId = 0;
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
         private static bool _initialized = false;
 
         public DailyRecordService()
@@ -20,7 +20,7 @@ namespace ProgressTracker.Services
         {
             if (_initialized) return;
 
-            lock (_lock)
+            lock (Lock)
             {
                 if (_initialized) return;
 
@@ -105,18 +105,14 @@ namespace ProgressTracker.Services
             }
         }
 
-        public IEnumerable<DailyRecordModel?> GetAll()
+        public IEnumerable<DailyRecordModel> GetAll()
         {
-            return _dailyRecords.Values.ToArray();
+            return DailyRecords.Values.ToArray();
         }
 
         public DailyRecordModel? GetOneById(int id)
         {
-            if (_dailyRecords.TryGetValue(id, out DailyRecordModel? dailyRecord))
-            {
-                return dailyRecord;
-            }
-            return null;
+            return DailyRecords.GetValueOrDefault(id);
         }
 
         public void AddOne(DailyRecordModel? dailyRecord)
@@ -132,18 +128,18 @@ namespace ProgressTracker.Services
                 if (dailyRecord.Id == 0)
                 {
                     dailyRecord.Id = GenerateUniqueId();
-                    _dailyRecords[dailyRecord.Id] = dailyRecord;
+                    DailyRecords[dailyRecord.Id] = dailyRecord;
                 }
                 else
                 {
-                    _dailyRecords[dailyRecord.Id] = dailyRecord;
+                    DailyRecords[dailyRecord.Id] = dailyRecord;
                 }
             }
         }
 
         private int GenerateUniqueId()
         {
-            lock (_lock)
+            lock (Lock)
             {
                 return ++_nextId;
             }
@@ -151,15 +147,15 @@ namespace ProgressTracker.Services
 
         public void RemoveOne(int id)
         {
-            lock (_lock)
+            lock (Lock)
             {
-                _dailyRecords.Remove(id);
+                DailyRecords.Remove(id);
             }
         }
 
-        public IEnumerable<DailyRecordModel?> GetAllInRange(DateTime startDate, DateTime endDate)
+        public IEnumerable<DailyRecordModel> GetAllInRange(DateTime startDate, DateTime endDate)
         {
-            var dailyRecords = _dailyRecords.Values
+            var dailyRecords = DailyRecords.Values
                 .Where(record => record?.Date >= startDate && record?.Date <= endDate)
                 .ToArray();
             return dailyRecords;
@@ -167,7 +163,7 @@ namespace ProgressTracker.Services
         
         private DailyRecordModel? GetRecordForDate(DateTime date)
         {
-            var dailyRecord = _dailyRecords.Values
+            var dailyRecord = DailyRecords.Values
                 .FirstOrDefault(record => record?.Date == date);
             return dailyRecord;
         }

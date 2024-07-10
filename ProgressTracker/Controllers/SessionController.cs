@@ -20,7 +20,6 @@ public class SessionController : Controller
     public IActionResult Index()
     {
         var sessions = _sessionService.GetAll();
-            
         var viewModel = sessions.Select(session =>
         {
             var subject = _subjectService.GetOneById(session.SubjectId);
@@ -41,6 +40,11 @@ public class SessionController : Controller
     {
         var subjects = _subjectService.GetAll();
         var session = _sessionService.GetOneById(id);
+        if (session == null)
+        {
+            return RedirectToAction("Index");
+        }
+        
         var model = new SessionViewEditModel
         {
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -58,19 +62,18 @@ public class SessionController : Controller
     // POST: Subject/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id,
-        [Bind("SubjectSelectedValue,Hours,Minutes")] SessionViewEditModel? viewModel)
+    public Task<IActionResult> Edit(int id, SessionViewEditModel? viewModel)
     {
         var session = _sessionService.GetOneById(id);
         if (viewModel == null || session == null)
         {
-            return NotFound();
+            return Task.FromResult<IActionResult>(NotFound());
         }
         
         var hours = viewModel.Hours;
         var minutes = viewModel.Minutes;
         session.Time = new TimeSpan(hours, minutes, 0);
         session.SubjectId = viewModel.SubjectSelectedValue;
-        return RedirectToAction("Index", "DailyRecord");
+        return Task.FromResult<IActionResult>(RedirectToAction("Index", "DailyRecord"));
     }
 }

@@ -4,7 +4,7 @@ namespace ProgressTracker.Services
 {
     public interface ISessionService
     {
-        IEnumerable<SessionModel?> GetAll();
+        IEnumerable<SessionModel> GetAll();
         SessionModel? GetOneById(int id);
         void RemoveOne(int id);
         void AddOne(SessionModel sessionModel);

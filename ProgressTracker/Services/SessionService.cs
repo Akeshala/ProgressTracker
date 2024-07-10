@@ -4,9 +4,9 @@ namespace ProgressTracker.Services
 {
     public class SessionService : ISessionService
     {
-        private static readonly Dictionary<int, SessionModel> _sessions = new Dictionary<int, SessionModel>();
+        private static readonly Dictionary<int, SessionModel> Sessions = new Dictionary<int, SessionModel>();
         private static int _nextId = 0;
-        private static readonly object _lock = new object();
+        private static readonly object Lock = new object();
         private static bool _initialized = false;
 
         public SessionService()
@@ -18,7 +18,7 @@ namespace ProgressTracker.Services
         {
             if (_initialized) return;
 
-            lock (_lock)
+            lock (Lock)
             {
                 if (_initialized) return;
 
@@ -52,18 +52,14 @@ namespace ProgressTracker.Services
             }
         }
 
-        public IEnumerable<SessionModel?> GetAll()
+        public IEnumerable<SessionModel> GetAll()
         {
-            return _sessions.Values.ToArray();
+            return Sessions.Values.ToArray();
         }
 
         public SessionModel? GetOneById(int id)
         {
-            if (_sessions.TryGetValue(id, out SessionModel session))
-            {
-                return session;
-            }
-            return null;
+            return Sessions.GetValueOrDefault(id);
         }
         
         public IEnumerable<SessionModel> GetMultiByIds(IEnumerable<int> sessionIds)
@@ -71,7 +67,7 @@ namespace ProgressTracker.Services
             var result = new List<SessionModel>();
             foreach (var sessionId in sessionIds)
             {
-                _sessions.TryGetValue(sessionId, out var session);
+                Sessions.TryGetValue(sessionId, out var session);
                 if (session != null)
                 {
                     result.Add(session);
@@ -87,18 +83,18 @@ namespace ProgressTracker.Services
                 if (session.Id == 0)
                 {
                     session.Id = GenerateUniqueId();
-                    _sessions[session.Id] = session;
+                    Sessions[session.Id] = session;
                 }
                 else
                 {
-                    _sessions[session.Id] = session;
+                    Sessions[session.Id] = session;
                 }
             }
         }
 
         public void RemoveOne(int id)
         {
-            _sessions.Remove(id);
+            Sessions.Remove(id);
         }
 
         private int GenerateUniqueId()

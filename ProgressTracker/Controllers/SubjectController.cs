@@ -31,11 +31,11 @@ public class SubjectController : Controller
     // POST: Subject/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, SubjectModel subjectModel)
+    public Task<IActionResult> Edit(int id, SubjectModel subjectModel)
     {
         subjectModel.Id = id;
         _subjectService.AddOne(subjectModel);
-        return RedirectToAction("Index", "Subject");
+        return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
     }
     
     // Get: Subject/Delete/{id}
@@ -51,10 +51,10 @@ public class SubjectController : Controller
     // Post: Subject/DeleteConfirmed/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public Task<IActionResult> DeleteConfirmed(int id)
     {
         _subjectService.RemoveOne(id);
-        return RedirectToAction("Index", "Subject");
+        return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
     }
     
     // GET /Subject/Create
@@ -67,14 +67,14 @@ public class SubjectController : Controller
 
     // Post: Subject/Create/
     [HttpPost]
-    public async Task<IActionResult> Create(SubjectViewModel? viewModel)
+    public Task<IActionResult> Create(SubjectViewModel? viewModel)
     {
         if (ModelState.IsValid && viewModel != null)
         {
             var subjectModel = new SubjectModel(viewModel.Name, viewModel.Credits, viewModel.LearningHours);
             _subjectService.AddOne(subjectModel);
-            return RedirectToAction("Index", "Subject");
+            return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
         }
-        return View(viewModel);
+        return Task.FromResult<IActionResult>(View(viewModel));
     }
 }

@@ -8,7 +8,7 @@ public class SubjectModel
 
     [StringLength(60, MinimumLength = 3)]
     [Required]
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     [Range(1, 10)]
     public int Credits { get; set; }
@@ -23,8 +23,6 @@ public class SubjectModel
         Credits = credits;
         LearningHours = learningHours;
     }
-    
-    public SubjectModel() { }
 
     public string GetName()
     {

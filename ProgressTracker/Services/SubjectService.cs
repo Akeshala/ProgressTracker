@@ -4,11 +4,11 @@ namespace ProgressTracker.Services
 {
     public class SubjectService : ISubjectService
     {
-        private static Dictionary<int, SubjectModel> _subjects = new Dictionary<int, SubjectModel>();
+        private static readonly Dictionary<int, SubjectModel> Subjects = new Dictionary<int, SubjectModel>();
 
         private static int _currentId = 0;
         private static bool _initialized = false;
-        private static readonly object _initLock = new object();
+        private static readonly object InitLock = new object();
 
         public SubjectService()
         {
@@ -19,7 +19,7 @@ namespace ProgressTracker.Services
         {
             if (_initialized) return;
 
-            lock (_initLock)
+            lock (InitLock)
             {
                 if (_initialized) return;
 
@@ -35,18 +35,14 @@ namespace ProgressTracker.Services
             }
         }
 
-        public IEnumerable<SubjectModel?> GetAll()
+        public IEnumerable<SubjectModel> GetAll()
         {
-            return _subjects.Values.ToArray();
+            return Subjects.Values.ToArray();
         }
 
         public SubjectModel? GetOneById(int id)
         {
-            if (_subjects.TryGetValue(id, out SubjectModel subject))
-            {
-                return subject;
-            }
-            return null;
+            return Subjects.GetValueOrDefault(id);
         }
 
         public void AddOne(SubjectModel? subjectModel)
@@ -56,18 +52,18 @@ namespace ProgressTracker.Services
                 if (subjectModel.Id == 0)
                 {
                     subjectModel.Id = GenerateUniqueId();
-                    _subjects[subjectModel.Id] = subjectModel;
+                    Subjects[subjectModel.Id] = subjectModel;
                 }
                 else
                 {
-                    _subjects[subjectModel.Id] = subjectModel;
+                    Subjects[subjectModel.Id] = subjectModel;
                 }
             }
         }
 
         public void RemoveOne(int id)
         {
-            _subjects.Remove(id);
+            Subjects.Remove(id);
         }
 
         private int GenerateUniqueId()

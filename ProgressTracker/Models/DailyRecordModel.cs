@@ -32,16 +32,6 @@ namespace ProgressTracker.Models
             _sessionIds.Add(sessionId);
         }
 
-        public DateTime GetDate()
-        {
-            return Date;
-        }
-        
-        public void SetDate(DateTime date)
-        {
-            Date = date;
-        }
-
         public TimeSpan GetTarget()
         {
             return Target;
