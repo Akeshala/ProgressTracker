@@ -35,9 +35,7 @@ public class WeeklyReportController : Controller
     // Get /WeeklyReport/GenerateReport
     public IActionResult Generate(DateTime date)
     {
-        (DateTime firstDate, DateTime lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
-        TempData["Message"] = "Report generated for the week "
-                              + firstDate.ToString("yyyy-MM-dd") + " - " + lastDate.ToString("yyyy-MM-dd");
+        var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
         var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
         var weeklySubjectReports = GetWeeklySubjectReport(dailyRecords);
         var weeklyBreakTime = GetWeeklyBreakTime(dailyRecords);
@@ -57,18 +55,21 @@ public class WeeklyReportController : Controller
             UntrackedTime = weeklyUntrackedTime,
             TrackedTime = weeklyTrackedTime,
         };
+
+        TempData["Message"] = "Report generated for the week " + firstDate.ToString(DateTimeLib.Ymd) + " - "
+                              + lastDate.ToString(DateTimeLib.Ymd);
+
         return View(viewModel);
     }
 
-    private IEnumerable<WeeklySubjectReportViewModel> GetWeeklySubjectReport(
-        IEnumerable<DailyRecordModel> dailyRecords)
+    private List<WeeklySubjectReportViewModel> GetWeeklySubjectReport(List<DailyRecordModel> dailyRecords)
     {
-        if (!dailyRecords.Any())
+        if (dailyRecords.Count == 0)
         {
-            return Enumerable.Empty<WeeklySubjectReportViewModel>();
+            return [];
         }
-        
-        Dictionary<int, TimeSpan> learnedTimeBySubjectId = new Dictionary<int, TimeSpan>();
+
+        var learnedTimeBySubjectId = new Dictionary<int, TimeSpan>();
 
         foreach (var dailyRecord in dailyRecords)
         {
@@ -97,40 +98,32 @@ public class WeeklyReportController : Controller
         return weeklySubjectReports;
     }
 
-    private TimeSpan GetWeeklyBreakTime(IEnumerable<DailyRecordModel> dailyRecords)
+    private TimeSpan GetWeeklyBreakTime(List<DailyRecordModel> dailyRecords)
     {
-        if (!dailyRecords.Any())
+        if (dailyRecords.Count == 0)
         {
             return new TimeSpan(0, 0, 0);
         }
 
         var breakTime = new TimeSpan(0, 0, 0);
-        foreach (var dailyRecord in dailyRecords)
-        {
-            var DailyBreakTime = dailyRecord.Break;
-            breakTime += DailyBreakTime;
-        }
-        
-        return breakTime;
+
+        return dailyRecords.Select(dailyRecord => dailyRecord.Break)
+            .Aggregate(breakTime, (current, dailyBreakTime) => current + dailyBreakTime);
     }
-    
-    private TimeSpan GetWeeklyUntrackedTime(IEnumerable<DailyRecordModel?> dailyRecords)
+
+    private TimeSpan GetWeeklyUntrackedTime(List<DailyRecordModel> dailyRecords)
     {
-        if (!dailyRecords.Any())
+        if (dailyRecords.Count == 0)
         {
             return new TimeSpan(0, 0, 0);
         }
 
         var unTrackedTime = new TimeSpan(0, 0, 0);
-        foreach (var dailyRecord in dailyRecords)
-        {
-            var dailyUntrackedTime = GetUntracked(dailyRecord);
-            unTrackedTime += dailyUntrackedTime;
-        }
-        
-        return unTrackedTime;
+
+        return dailyRecords.Select(GetUntracked).Aggregate(unTrackedTime,
+            (current, dailyUntrackedTime) => current + dailyUntrackedTime);
     }
-    
+
     private TimeSpan GetUntracked(DailyRecordModel dailyRecord)
     {
         var sessionIds = dailyRecord.SessionIds;
@@ -139,24 +132,20 @@ public class WeeklyReportController : Controller
         return target - (_sessionService.GetMultiByIds(sessionIds)
             .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime);
     }
-    
-    private TimeSpan GetWeeklyTrackedTime(IEnumerable<DailyRecordModel?> dailyRecords)
+
+    private TimeSpan GetWeeklyTrackedTime(List<DailyRecordModel> dailyRecords)
     {
-        if (!dailyRecords.Any())
+        if (dailyRecords.Count == 0)
         {
             return new TimeSpan(0, 0, 0);
         }
 
         var trackedTime = new TimeSpan(0, 0, 0);
-        foreach (var dailyRecord in dailyRecords)
-        {
-            var dailyTrackedTime = GetTracked(dailyRecord);
-            trackedTime += dailyTrackedTime;
-        }
-        
-        return trackedTime;
+
+        return dailyRecords.Select(GetTracked).Aggregate(trackedTime,
+            (current, dailyTrackedTime) => current + dailyTrackedTime);
     }
-    
+
     private TimeSpan GetTracked(DailyRecordModel dailyRecord)
     {
         var sessionIds = dailyRecord.SessionIds;
@@ -164,7 +153,7 @@ public class WeeklyReportController : Controller
         return _sessionService.GetMultiByIds(sessionIds)
             .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime;
     }
-    
+
     private TimeSpan GetLearned(DailyRecordModel dailyRecord)
     {
         var sessionIds = dailyRecord.SessionIds;

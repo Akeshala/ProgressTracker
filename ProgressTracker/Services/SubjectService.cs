@@ -37,7 +37,7 @@ namespace ProgressTracker.Services
 
         public IEnumerable<SubjectModel> GetAll()
         {
-            return Subjects.Values.ToArray();
+            return Subjects.Values.ToList();
         }
 
         public SubjectModel? GetOneById(int id)

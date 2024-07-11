@@ -36,15 +36,15 @@ public class ResultPredictorController : Controller
         return View(viewModel);
     }
 
-    private IEnumerable<ResultPredictorSubjectViewModel> GetSubjectReport(
-        IEnumerable<DailyRecordModel?> dailyRecords)
+    private List<ResultPredictorSubjectViewModel> GetSubjectReport(
+        List<DailyRecordModel> dailyRecords)
     {
-        if (!dailyRecords.Any())
+        if (dailyRecords.Count == 0)
         {
-            return Enumerable.Empty<ResultPredictorSubjectViewModel>();
+            return [];
         }
 
-        Dictionary<int, TimeSpan> learnedTimeBySubjectId = new Dictionary<int, TimeSpan>();
+        var learnedTimeBySubjectId = new Dictionary<int, TimeSpan>();
 
         foreach (var dailyRecord in dailyRecords)
         {
@@ -67,7 +67,7 @@ public class ResultPredictorController : Controller
         {
             var subject = _subjectService.GetOneById(kvp.Key);
             var target = new TimeSpan(subject?.LearningHours ?? 0, 0, 0);
-            (string grade, double studyRatio) = GetStudyRatio(kvp.Value, target);
+            var (grade, studyRatio) = GetStudyRatio(kvp.Value, target);
             return new ResultPredictorSubjectViewModel
             {
                 SubjectId = kvp.Key,

@@ -2,6 +2,8 @@ namespace ProgressTracker.Utils;
 
 public static class DateTimeLib
 {
+    public const string Ymd = "yyyy-MM-dd";
+
     public static (DateTime firstDate, DateTime lastDate) GetFirstAndLastDateOfWeek(DateTime date)
     {
         var firstDate = date.AddDays(-(int)date.DayOfWeek + 1);

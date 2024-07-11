@@ -8,20 +8,23 @@ public class SubjectModel
 
     [StringLength(60, MinimumLength = 3)]
     [Required]
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
-    [Range(1, 10)]
-    public int Credits { get; set; }
-    
+    [Range(1, 10)] public int Credits { get; set; }
+
     [Display(Name = "Learning Hours")]
     [Range(1, 100)]
     public int LearningHours { get; set; }
-    
+
     public SubjectModel(string name, int credits, int learningHours)
     {
         Name = name;
         Credits = credits;
         LearningHours = learningHours;
+    }
+
+    public SubjectModel()
+    {
     }
 
     public string GetName()

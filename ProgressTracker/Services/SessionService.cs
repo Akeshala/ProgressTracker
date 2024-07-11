@@ -54,7 +54,7 @@ namespace ProgressTracker.Services
 
         public IEnumerable<SessionModel> GetAll()
         {
-            return Sessions.Values.ToArray();
+            return Sessions.Values.ToList();
         }
 
         public SessionModel? GetOneById(int id)

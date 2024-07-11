@@ -105,9 +105,9 @@ namespace ProgressTracker.Services
             }
         }
 
-        public IEnumerable<DailyRecordModel> GetAll()
+        public List<DailyRecordModel> GetAll()
         {
-            return DailyRecords.Values.ToArray();
+            return DailyRecords.Values.ToList();
         }
 
         public DailyRecordModel? GetOneById(int id)
@@ -153,12 +153,12 @@ namespace ProgressTracker.Services
             }
         }
 
-        public IEnumerable<DailyRecordModel> GetAllInRange(DateTime startDate, DateTime endDate)
+        public List<DailyRecordModel> GetAllInRange(DateTime startDate, DateTime endDate)
         {
             var dailyRecords = DailyRecords.Values
                 .Where(record => record?.Date >= startDate && record?.Date <= endDate)
                 .ToArray();
-            return dailyRecords;
+            return dailyRecords.ToList();
         }
         
         private DailyRecordModel? GetRecordForDate(DateTime date)

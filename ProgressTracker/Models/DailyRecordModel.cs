@@ -7,14 +7,14 @@ namespace ProgressTracker.Models
         public DateTime Date { get; set; }
         public TimeSpan Target { get; set; }
         public TimeSpan Break { get; set; }
-        private readonly List<int> _sessionIds;
-        
+        public List<int> SessionIds { get; }
+
         public DailyRecordModel()
         {
             Date = DateTime.Now;
             Target = new TimeSpan(DailyTarget, 0, 0);
             Break = TimeSpan.Zero;
-            _sessionIds = [];
+            SessionIds = [];
         }
         
         public DailyRecordModel(int year, int month, int day)
@@ -22,14 +22,12 @@ namespace ProgressTracker.Models
             Date = new DateTime(year, month, day);
             Target = new TimeSpan(DailyTarget, 0, 0);
             Break = TimeSpan.Zero;
-            _sessionIds = [];
+            SessionIds = [];
         }
-
-        public List<int> SessionIds => _sessionIds;
 
         public void AddOneSessionId(int sessionId)
         {
-            _sessionIds.Add(sessionId);
+            SessionIds.Add(sessionId);
         }
 
         public TimeSpan GetTarget()

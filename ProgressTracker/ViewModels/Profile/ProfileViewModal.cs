@@ -2,6 +2,6 @@ namespace ProgressTracker.ViewModels.Profile;
 
 public class ProfileViewModal
 {
-    public StudentViewModal StudentViewModal { get; set; }
-    public UniversityViewModal UniversityViewModal { get; set; }
+    public required StudentViewModal StudentViewModal { get; set; }
+    public required UniversityViewModal UniversityViewModal { get; set; }
 }
