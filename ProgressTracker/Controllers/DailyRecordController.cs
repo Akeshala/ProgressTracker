@@ -28,7 +28,7 @@ public class DailyRecordController : Controller
         var viewModel = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
         {
             DailyRecordModel = dailyRecord,
-            Learned = GetLearned(dailyRecord),
+            Learned = _dailyRecordService.GetLearned(dailyRecord),
         }).ToList();
         return View(viewModel);
     }
@@ -159,7 +159,7 @@ public class DailyRecordController : Controller
         var model = new EditDailyRecordViewModel
         {
             DailyRecord = dailyRecord,
-            Learned = GetLearned(dailyRecord),
+            Learned = _dailyRecordService.GetLearned(dailyRecord),
             BreakHours = breakTime.Hours,
             BreakMinutes = breakTime.Minutes,
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -207,7 +207,7 @@ public class DailyRecordController : Controller
         if (!(breakHours == 0 && breakMinutes == 0))
         {
             var breakTimeSpan = new TimeSpan(breakHours, breakMinutes, 0);
-            if (breakTimeSpan + GetLearned(dailyRecord) > dailyRecord.GetTarget())
+            if (breakTimeSpan + _dailyRecordService.GetLearned(dailyRecord) > dailyRecord.GetTarget())
             {
                 ViewData["Error"] = "Adding this Break exceeds daily Target";
                 var subjects = _subjectService.GetAll();
@@ -226,7 +226,7 @@ public class DailyRecordController : Controller
                         Id = session.Id,
                     };
                 }).ToList();
-                viewModel.Learned = GetLearned(dailyRecord);
+                viewModel.Learned = _dailyRecordService.GetLearned(dailyRecord);
                 viewModel.BreakHours = dailyRecord.Break.Hours;
                 viewModel.BreakMinutes = dailyRecord.Break.Minutes;
                 return Task.FromResult<IActionResult>(View(viewModel));
@@ -245,7 +245,7 @@ public class DailyRecordController : Controller
             if (!(subjectHours == 0 && subjectMinutes == 0))
             {
                 var sessionTimeSpan = new TimeSpan(subjectHours, subjectMinutes, 0);
-                if (sessionTimeSpan + GetRecorded(dailyRecord) > dailyRecord.GetTarget())
+                if (sessionTimeSpan + _dailyRecordService.GetRecorded(dailyRecord) > dailyRecord.GetTarget())
                 {
                     ViewData["Error"] = "Adding this Session exceeds daily Target";
                     var subjects = _subjectService.GetAll();
@@ -264,7 +264,7 @@ public class DailyRecordController : Controller
                             Id = session.Id,
                         };
                     }).ToList();
-                    viewModel.Learned = GetLearned(dailyRecord);
+                    viewModel.Learned = _dailyRecordService.GetLearned(dailyRecord);
                     viewModel.BreakHours = dailyRecord.Break.Hours;
                     viewModel.BreakMinutes = dailyRecord.Break.Minutes;
                     return Task.FromResult<IActionResult>(View(viewModel));
@@ -277,20 +277,5 @@ public class DailyRecordController : Controller
         }
 
         return Task.FromResult<IActionResult>(RedirectToAction("Edit", "DailyRecord", dailyRecord.Id));
-    }
-
-    private TimeSpan GetLearned(DailyRecordModel dailyRecord)
-    {
-        var sessionIds = dailyRecord.SessionIds;
-        return _sessionService.GetMultiByIds(sessionIds)
-            .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time);
-    }
-
-    private TimeSpan GetRecorded(DailyRecordModel dailyRecord)
-    {
-        var sessionIds = dailyRecord.SessionIds;
-        var breakTime = dailyRecord.Break;
-        return _sessionService.GetMultiByIds(sessionIds)
-            .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime;
     }
 }

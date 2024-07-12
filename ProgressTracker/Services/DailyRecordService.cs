@@ -10,9 +10,12 @@ namespace ProgressTracker.Services
         private static int _nextId = 0;
         private static readonly object Lock = new object();
         private static bool _initialized = false;
+        
+        private readonly ISessionService _sessionService;
 
-        public DailyRecordService()
+        public DailyRecordService(ISessionService sessionService)
         {
+            _sessionService = sessionService;
             InitializeDailyRecords();
         }
 
@@ -161,12 +164,43 @@ namespace ProgressTracker.Services
             return dailyRecords.ToList();
         }
         
+        public TimeSpan GetLearned(DailyRecordModel dailyRecord)
+        {
+            var sessionIds = dailyRecord.SessionIds;
+            return _sessionService.GetMultiByIds(sessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time);
+        }
+        
+        public TimeSpan GetUntracked(DailyRecordModel dailyRecord)
+        {
+            var sessionIds = dailyRecord.SessionIds;
+            var breakTime = dailyRecord.Break;
+            var target = dailyRecord.GetTarget();
+            return target - (_sessionService.GetMultiByIds(sessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime);
+        }
+        
+        public TimeSpan GetTracked(DailyRecordModel dailyRecord)
+        {
+            var sessionIds = dailyRecord.SessionIds;
+            var breakTime = dailyRecord.Break;
+            return _sessionService.GetMultiByIds(sessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime;
+        }
+        
+        public TimeSpan GetRecorded(DailyRecordModel dailyRecord)
+        {
+            var sessionIds = dailyRecord.SessionIds;
+            var breakTime = dailyRecord.Break;
+            return _sessionService.GetMultiByIds(sessionIds)
+                .Aggregate(TimeSpan.Zero, (ac, session) => ac + session.Time) + breakTime;
+        }
+        
         private DailyRecordModel? GetRecordForDate(DateTime date)
         {
             var dailyRecord = DailyRecords.Values
                 .FirstOrDefault(record => record?.Date == date);
             return dailyRecord;
         }
-
     }
 }

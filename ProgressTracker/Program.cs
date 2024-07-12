@@ -7,6 +7,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<ISubjectService, SubjectService>();
 builder.Services.AddSingleton<IDailyRecordService, DailyRecordService>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
+builder.Services.AddSingleton<IWeeklyReportService, WeeklyReportService>();
 
 var app = builder.Build();
 
