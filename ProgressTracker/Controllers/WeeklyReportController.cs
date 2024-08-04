@@ -33,8 +33,15 @@ public class WeeklyReportController : Controller
     // Get /WeeklyReport/GenerateReport
     public async Task<IActionResult> Generate(DateTime date)
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
-        var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
+        var dailyRecords = _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
         var (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime) = await 
             _weeklyReportService.GetReport(dailyRecords);
         var dailyRecordTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel

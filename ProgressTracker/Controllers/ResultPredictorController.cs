@@ -22,8 +22,15 @@ public class ResultPredictorController : Controller
     // Get /ResultPredictor/Index
     public async Task<IActionResult> Index()
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var (firstDate, lastDate) = DateTimeLib.GetDayBeforeMonths(6);
-        var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
+        var dailyRecords = _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
         var predictions = await _resultPredictorService.GetPredictions(dailyRecords);
         
         var subjectReports = predictions.Select(kvp =>

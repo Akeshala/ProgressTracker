@@ -26,7 +26,13 @@ public class DailyRecordController : Controller
     // GET /DailyRecord/
     public async Task<IActionResult> Index()
     {
-        var dailyRecords = _dailyRecordService.GetAll();
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        var dailyRecords = _dailyRecordService.GetAllByUser(int.Parse(userId));
         var viewModelTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel
         {
             DailyRecordModel = dailyRecord,
@@ -84,10 +90,10 @@ public class DailyRecordController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AddDailyRecordViewModel viewModel)
     {
-        if (!ModelState.IsValid)
-        {
-            return NotFound();
-        }
+        // if (!ModelState.IsValid)
+        // {
+        //     return NotFound();
+        // }
         // Extract user ID from cookies
         string? userId = HttpContext.Request.Cookies["userId"];
         if (userId == null)
@@ -98,6 +104,7 @@ public class DailyRecordController : Controller
         try
         {
             var dailyRecord = viewModel.DailyRecord;
+            dailyRecord.UserId = int.Parse(userId);
 
             // validate and set break time
             var breakHours = viewModel.BreakHours ?? 0;
@@ -170,7 +177,7 @@ public class DailyRecordController : Controller
         }
         
         var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
-        var dailyRecord = _dailyRecordService.GetOneById(id);
+        var dailyRecord = await _dailyRecordService.GetOneById(id);
 
         if (dailyRecord == null)
         {
@@ -224,7 +231,7 @@ public class DailyRecordController : Controller
         }
 
         var newDailyRecord = viewModel.DailyRecord;
-        var dailyRecord = _dailyRecordService.GetOneById(id);
+        var dailyRecord = await _dailyRecordService.GetOneById(id);
         if (dailyRecord == null)
         {
             return await Task.FromResult<IActionResult>(NotFound());
