@@ -13,5 +13,5 @@ public class EditDailyRecordViewModel
     public TimeSpan? Learned { get; set; }
     public DailyRecordModel DailyRecord { get; set; }
     public List<SelectListItem>? SubjectOptions { get; set; }
-    public List<SessionViewModel>? Sessions { get; set; }
+    public SessionViewModel[] Sessions { get; set; }
 }

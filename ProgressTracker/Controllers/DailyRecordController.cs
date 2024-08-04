@@ -34,9 +34,9 @@ public class DailyRecordController : Controller
     }
 
     // GET /DailyRecord/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        var subjects = _subjectService.GetAll();
+        var subjects = await _subjectService.GetAllForUser();
         var model = new AddDailyRecordViewModel
         {
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -48,7 +48,7 @@ public class DailyRecordController : Controller
         };
         return View(model);
     }
-    
+
     // Get: DailyRecord/Delete/{id}
     public async Task<IActionResult> Delete(int? id)
     {
@@ -56,9 +56,10 @@ public class DailyRecordController : Controller
         {
             return NotFound();
         }
+
         return await DeleteConfirmed(id.Value);
     }
-    
+
     // Post: DailyRecord/Delete/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -72,7 +73,7 @@ public class DailyRecordController : Controller
     // Post: DailyRecord/Create/
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(AddDailyRecordViewModel viewModel)
+    public async Task<IActionResult> Create(AddDailyRecordViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
@@ -92,7 +93,7 @@ public class DailyRecordController : Controller
                 if (breakTimeSpan > dailyRecord.GetTarget())
                 {
                     TempData["Error"] = "Break can not be larger than Target!";
-                    var subjects = _subjectService.GetAll();
+                    var subjects = await _subjectService.GetAllForUser();
                     viewModel.SubjectOptions = subjects.Select(subject => new SelectListItem
                     {
                         Value = subject.Id.ToString(),
@@ -118,7 +119,7 @@ public class DailyRecordController : Controller
                     if (newSession.Time + dailyRecord.Break > dailyRecord.Target)
                     {
                         TempData["Error"] = "Break and Session durations can not be larger than daily target!";
-                        var subjects = _subjectService.GetAll();
+                        var subjects = await _subjectService.GetAllForUser();
                         viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                         {
                             Value = sbj.Id.ToString(),
@@ -131,7 +132,7 @@ public class DailyRecordController : Controller
                     dailyRecord.AddOneSessionId(newSession.Id);
                 }
             }
-            
+
             _dailyRecordService.AddOne(dailyRecord);
             TempData["Message"] = "Record created successfully!";
         }
@@ -144,9 +145,9 @@ public class DailyRecordController : Controller
     }
 
     // GET /DailyRecord/Edit/{id}
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var subjects = _subjectService.GetAll();
+        var subjects = await _subjectService.GetAllForUser();
         var dailyRecord = _dailyRecordService.GetOneById(id);
 
         if (dailyRecord == null)
@@ -156,6 +157,17 @@ public class DailyRecordController : Controller
 
         var breakTime = dailyRecord.GetBreak();
         var sessionIds = dailyRecord.SessionIds;
+        var sessionsTasks = _sessionService.GetMultiByIds(sessionIds).Select(async session =>
+        {
+            var subject = await _subjectService.GetOneById(session.SubjectId);
+            return new SessionViewModel
+            {
+                SubjectName = subject?.Name ?? "Unknown",
+                Time = session.Time,
+                Id = session.Id,
+            };
+        });
+        var sessions = await Task.WhenAll(sessionsTasks);
         var model = new EditDailyRecordViewModel
         {
             DailyRecord = dailyRecord,
@@ -167,16 +179,7 @@ public class DailyRecordController : Controller
                 Value = subject.Id.ToString(),
                 Text = subject.Name,
             }).ToList(),
-            Sessions = _sessionService.GetMultiByIds(sessionIds).Select(session =>
-            {
-                var subject = _subjectService.GetOneById(session.SubjectId);
-                return new SessionViewModel
-                {
-                    SubjectName = subject?.Name ?? "Unknown",
-                    Time = session.Time,
-                    Id = session.Id,
-                };
-            }).ToList(),
+            Sessions = sessions,
         };
         return View(model);
     }
@@ -184,18 +187,18 @@ public class DailyRecordController : Controller
     // POST: DailyRecord/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> Edit(int id, EditDailyRecordViewModel viewModel)
+    public async Task<IActionResult> Edit(int id, EditDailyRecordViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-            return Task.FromResult<IActionResult>(NotFound());
+            return await Task.FromResult<IActionResult>(NotFound());
         }
 
         var newDailyRecord = viewModel.DailyRecord;
         var dailyRecord = _dailyRecordService.GetOneById(id);
         if (dailyRecord == null)
         {
-            return Task.FromResult<IActionResult>(NotFound());
+            return await Task.FromResult<IActionResult>(NotFound());
         }
 
         // set new date
@@ -210,26 +213,28 @@ public class DailyRecordController : Controller
             if (breakTimeSpan + _dailyRecordService.GetLearned(dailyRecord) > dailyRecord.GetTarget())
             {
                 ViewData["Error"] = "Adding this Break exceeds daily Target";
-                var subjects = _subjectService.GetAll();
+                var subjects = await _subjectService.GetAllForUser();
                 viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                 {
                     Value = sbj.Id.ToString(),
                     Text = sbj.Name,
                 }).ToList();
-                viewModel.Sessions = _sessionService.GetMultiByIds(dailyRecord.SessionIds).Select(session =>
-                {
-                    var subject = _subjectService.GetOneById(session.SubjectId);
-                    return new SessionViewModel
+                var sessionViewModelTasks = _sessionService.GetMultiByIds(dailyRecord.SessionIds).Select(
+                    async session =>
                     {
-                        SubjectName = subject?.Name ?? "Unknown",
-                        Time = session.Time,
-                        Id = session.Id,
-                    };
-                }).ToList();
+                        var subject = await _subjectService.GetOneById(session.SubjectId);
+                        return new SessionViewModel
+                        {
+                            SubjectName = subject?.Name ?? "Unknown",
+                            Time = session.Time,
+                            Id = session.Id,
+                        };
+                    });
+                viewModel.Sessions = await Task.WhenAll(sessionViewModelTasks);
                 viewModel.Learned = _dailyRecordService.GetLearned(dailyRecord);
                 viewModel.BreakHours = dailyRecord.Break.Hours;
                 viewModel.BreakMinutes = dailyRecord.Break.Minutes;
-                return Task.FromResult<IActionResult>(View(viewModel));
+                return await Task.FromResult<IActionResult>(View(viewModel));
             }
 
             dailyRecord.Break = breakTimeSpan;
@@ -237,7 +242,7 @@ public class DailyRecordController : Controller
 
         // add session if available
         var subjectSelectedValue = viewModel.SubjectSelectedValue ?? 0;
-        var subject = _subjectService.GetOneById(subjectSelectedValue);
+        var subject = await _subjectService.GetOneById(subjectSelectedValue);
         if (subject != null)
         {
             var subjectHours = viewModel.SubjectHours ?? 0;
@@ -248,26 +253,28 @@ public class DailyRecordController : Controller
                 if (sessionTimeSpan + _dailyRecordService.GetRecorded(dailyRecord) > dailyRecord.GetTarget())
                 {
                     ViewData["Error"] = "Adding this Session exceeds daily Target";
-                    var subjects = _subjectService.GetAll();
+                    var subjects = await _subjectService.GetAllForUser();
                     viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                     {
                         Value = sbj.Id.ToString(),
                         Text = sbj.Name,
                     }).ToList();
-                    viewModel.Sessions = _sessionService.GetMultiByIds(dailyRecord.SessionIds).Select(session =>
-                    {
-                        var sessionSubject = _subjectService.GetOneById(session.SubjectId);
-                        return new SessionViewModel
+                    var sessionViewModelTasks = _sessionService.GetMultiByIds(dailyRecord.SessionIds).Select(
+                        async session =>
                         {
-                            SubjectName = sessionSubject?.Name ?? "Unknown",
-                            Time = session.Time,
-                            Id = session.Id,
-                        };
-                    }).ToList();
+                            var sessionSubject = await _subjectService.GetOneById(session.SubjectId);
+                            return new SessionViewModel
+                            {
+                                SubjectName = sessionSubject?.Name ?? "Unknown",
+                                Time = session.Time,
+                                Id = session.Id,
+                            };
+                        }).ToList();
+                    viewModel.Sessions = await Task.WhenAll(sessionViewModelTasks);
                     viewModel.Learned = _dailyRecordService.GetLearned(dailyRecord);
                     viewModel.BreakHours = dailyRecord.Break.Hours;
                     viewModel.BreakMinutes = dailyRecord.Break.Minutes;
-                    return Task.FromResult<IActionResult>(View(viewModel));
+                    return await Task.FromResult<IActionResult>(View(viewModel));
                 }
 
                 var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
@@ -276,6 +283,6 @@ public class DailyRecordController : Controller
             }
         }
 
-        return Task.FromResult<IActionResult>(RedirectToAction("Edit", "DailyRecord", dailyRecord.Id));
+        return await Task.FromResult<IActionResult>(RedirectToAction("Edit", "DailyRecord", dailyRecord.Id));
     }
 }

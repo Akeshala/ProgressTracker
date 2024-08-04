@@ -17,9 +17,8 @@ public class WeeklyReportService : IWeeklyReportService
         _dailyRecordService = dailyRecordService;
     }
 
-    public (List<WeeklySubjectReportViewModel> weeklySubjectReports, TimeSpan weeklyBreakTime, TimeSpan
-        weeklyUntrackedTime,
-        TimeSpan weeklyTrackedTime) GetReport(List<DailyRecordModel> dailyRecords)
+    public (Task<List<WeeklySubjectReportViewModel>> weeklySubjectReports, TimeSpan weeklyBreakTime, TimeSpan
+        weeklyUntrackedTime, TimeSpan weeklyTrackedTime) GetReport(List<DailyRecordModel> dailyRecords)
     {
         var weeklySubjectReports = GetWeeklySubjectReport(dailyRecords);
         var weeklyBreakTime = GetWeeklyBreakTime(dailyRecords);
@@ -30,7 +29,7 @@ public class WeeklyReportService : IWeeklyReportService
     }
 
 
-    private List<WeeklySubjectReportViewModel> GetWeeklySubjectReport(List<DailyRecordModel> dailyRecords)
+    private async Task<List<WeeklySubjectReportViewModel>> GetWeeklySubjectReport(List<DailyRecordModel> dailyRecords)
     {
         if (dailyRecords.Count == 0)
         {
@@ -56,14 +55,20 @@ public class WeeklyReportService : IWeeklyReportService
             }
         }
 
-        var weeklySubjectReports = learnedTimeBySubjectId.Select(kvp => new WeeklySubjectReportViewModel
+        var viewModelTasks = learnedTimeBySubjectId.Select(async kvp =>
         {
-            SubjectId = kvp.Key,
-            SubjectName = _subjectService.GetOneById(kvp.Key)?.Name ?? "Unknown Subject",
-            Learned = kvp.Value
+            var subjectName = await _subjectService.GetOneById(kvp.Key);
+            return new WeeklySubjectReportViewModel
+            {
+                SubjectId = kvp.Key,
+                SubjectName = subjectName?.Name ?? "Unknown Subject",
+                Learned = kvp.Value
+            };
         }).ToList();
+        
+        var weeklySubjectReports = await Task.WhenAll(viewModelTasks);
 
-        return weeklySubjectReports;
+        return weeklySubjectReports.ToList();
     }
 
     private TimeSpan GetWeeklyBreakTime(List<DailyRecordModel> dailyRecords)

@@ -1,12 +1,13 @@
-using ProgressTracker.Models;
+using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Services
 {
     public interface ISubjectService
     {
-        IEnumerable<SubjectModel> GetAll();
-        SubjectModel? GetOneById(int id);
-        void RemoveOne(int id);
-        void AddOne(SubjectModel subjectModel);
+        Task<List<SubjectViewModel>> GetAllForUser();
+        Task<SubjectViewModel?> GetOneById(int id);
+        Task<bool> RemoveOne(int id);
+        Task<bool> AddOne(SubjectAddModel subjectViewModel);
+        Task<List<SubjectViewModel>> GetAll();
     }
 }

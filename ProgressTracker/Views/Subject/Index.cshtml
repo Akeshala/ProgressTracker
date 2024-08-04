@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProgressTracker.Models.SubjectModel>
+﻿@model IEnumerable<ProgressTracker.ViewModels.Subject.SubjectViewModel>
 
 @{
     ViewData["Title"] = "Subject List";
@@ -7,7 +7,7 @@
 <h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Add">Add New</a>
 </p>
 
 <table class="table">
@@ -44,7 +44,6 @@
                 @Html.DisplayFor(modelItem => item.LearningHours)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>

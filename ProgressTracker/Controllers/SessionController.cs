@@ -17,28 +17,31 @@ public class SessionController : Controller
     }
     
     // GET /Session/
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         var sessions = _sessionService.GetAll();
-        var viewModel = sessions.Select(session =>
+        var viewModelTasks = sessions.Select(async session =>
         {
-            var subject = _subjectService.GetOneById(session.SubjectId);
+            var subject = await _subjectService.GetOneById(session.SubjectId);
             return new SessionViewModel
             {
                 SubjectName = subject?.Name ?? "Unknown",
                 Time = session.Time,
                 Id = session.Id,
             };
-        }).ToList();
-        
+        });
+
+        var viewModel = await Task.WhenAll(viewModelTasks);
+
         return View(viewModel);
     }
 
+
     // GET /Session/Edit
     [HttpGet]
-    public IActionResult Edit(int id)
+    public async Task<IActionResult> Edit(int id)
     {
-        var subjects = _subjectService.GetAll();
+        var subjects = await _subjectService.GetAllForUser();
         var session = _sessionService.GetOneById(id);
         if (session == null)
         {

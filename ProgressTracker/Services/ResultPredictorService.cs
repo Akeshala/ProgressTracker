@@ -14,13 +14,14 @@ public class ResultPredictorService : IResultPredictorService
         _subjectService = subjectService;
     }
 
-    public List<(int subjectId, string subjectName, TimeSpan learned, TimeSpan target, string grade, double level)>
+    public async
+        Task<List<(int subjectId, string subjectName, TimeSpan learned, TimeSpan target, string grade, double level)>>
         GetPredictions(List<DailyRecordModel> dailyRecords)
     {
         var learnedTimeBySubjectId = GetLearnedTimeBySubjectIds(dailyRecords);
-        var subjectReports = learnedTimeBySubjectId.Select(kvp =>
+        var subjectReportsTasks = learnedTimeBySubjectId.Select(async kvp =>
         {
-            var subject = _subjectService.GetOneById(kvp.Key);
+            var subject = await _subjectService.GetOneById(kvp.Key);
             var target = new TimeSpan(subject?.LearningHours ?? 0, 0, 0);
             var (grade, studyRatio) = ResultsLib.GetStudyRatio(kvp.Value, target);
             return
@@ -33,7 +34,9 @@ public class ResultPredictorService : IResultPredictorService
                 Math.Round(studyRatio * 100, 2)
             );
         }).ToList();
-        return subjectReports;
+        var subjectReports = await Task.WhenAll(subjectReportsTasks);
+
+        return subjectReports.ToList();
     }
 
     private Dictionary<int, TimeSpan> GetLearnedTimeBySubjectIds(List<DailyRecordModel> dailyRecords)
@@ -61,6 +64,7 @@ public class ResultPredictorService : IResultPredictorService
                 }
             }
         }
+
         return learnedTimeBySubjectId;
     }
 }

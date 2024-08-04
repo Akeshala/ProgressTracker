@@ -1,74 +1,83 @@
-using ProgressTracker.Models;
+using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Services
 {
     public class SubjectService : ISubjectService
     {
-        private static readonly Dictionary<int, SubjectModel> Subjects = new Dictionary<int, SubjectModel>();
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<SubjectService> _logger;
 
-        private static int _currentId = 0;
-        private static bool _initialized = false;
-        private static readonly object InitLock = new object();
-
-        public SubjectService()
+        public SubjectService(IHttpClientFactory httpClientFactory, ILogger<SubjectService> logger)
         {
-            InitializeSubjects();
+            _httpClient = httpClientFactory.CreateClient("ProgressTrackerSubjectService");
+            _logger = logger;
         }
 
-        private void InitializeSubjects()
+        public async Task<List<SubjectViewModel>> GetAll()
         {
-            if (_initialized) return;
-
-            lock (InitLock)
+            var subjectResponse = await _httpClient.GetAsync("subject/all");
+            if (subjectResponse.IsSuccessStatusCode)
             {
-                if (_initialized) return;
+                return await subjectResponse.Content.ReadFromJsonAsync<List<SubjectViewModel>>() ??
+                       new List<SubjectViewModel>();
+            }
 
-                AddOne(new SubjectModel("Mathematics", 5, 100));
-                AddOne(new SubjectModel("Physics", 4, 75));
-                AddOne(new SubjectModel("Chemistry", 3, 75));
-                AddOne(new SubjectModel("Biology", 4, 120));
-                AddOne(new SubjectModel("History", 2, 50));
-                AddOne(new SubjectModel("Geography", 3, 50));
-                AddOne(new SubjectModel("Computer Science", 6, 90));
+            _logger.LogError($"Error fetching subjects: {subjectResponse.ReasonPhrase}");
+            return new List<SubjectViewModel>();
+        }
 
-                _initialized = true;
+        public async Task<List<SubjectViewModel>> GetAllForUser()
+        {
+            var subjectResponse = await _httpClient.GetAsync("subject/all/1");
+            if (subjectResponse.IsSuccessStatusCode)
+            {
+                return await subjectResponse.Content.ReadFromJsonAsync<List<SubjectViewModel>>() ??
+                       new List<SubjectViewModel>();
+            }
+
+            _logger.LogError($"Error fetching subjects: {subjectResponse.ReasonPhrase}");
+            return new List<SubjectViewModel>();
+        }
+
+        public async Task<SubjectViewModel?> GetOneById(int id)
+        {
+            var subjectResponse = await _httpClient.GetAsync($"subject/view/1/{id}");
+            if (subjectResponse.IsSuccessStatusCode)
+            {
+                return await subjectResponse.Content.ReadFromJsonAsync<SubjectViewModel>();
+            }
+
+            _logger.LogError($"Error fetching subject: {subjectResponse.ReasonPhrase}");
+            return null;
+        }
+
+        public async Task<bool> AddOne(SubjectAddModel subjectModel)
+        {
+            subjectModel.UserId = 1;
+            var response = await _httpClient.PostAsJsonAsync("subject/add", subjectModel);
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                _logger.LogError($"Error adding subject: {response.ReasonPhrase}");
+                return false;
             }
         }
 
-        public IEnumerable<SubjectModel> GetAll()
+        public async Task<bool> RemoveOne(int id)
         {
-            return Subjects.Values.ToList();
-        }
-
-        public SubjectModel? GetOneById(int id)
-        {
-            return Subjects.GetValueOrDefault(id);
-        }
-
-        public void AddOne(SubjectModel? subjectModel)
-        {
-            if (subjectModel != null)
+            var response = await _httpClient.DeleteAsync($"subject/remove/{id}/1");
+            if (response.IsSuccessStatusCode)
             {
-                if (subjectModel.Id == 0)
-                {
-                    subjectModel.Id = GenerateUniqueId();
-                    Subjects[subjectModel.Id] = subjectModel;
-                }
-                else
-                {
-                    Subjects[subjectModel.Id] = subjectModel;
-                }
+                return true;
             }
-        }
-
-        public void RemoveOne(int id)
-        {
-            Subjects.Remove(id);
-        }
-
-        private int GenerateUniqueId()
-        {
-            return ++_currentId;
+            else
+            {
+                _logger.LogError($"Error deleting subject with ID {id}: {response.ReasonPhrase}");
+                return false;
+            }
         }
     }
 }

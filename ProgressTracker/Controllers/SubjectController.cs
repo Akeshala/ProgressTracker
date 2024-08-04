@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ProgressTracker.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Services;
 using ProgressTracker.ViewModels.Subject;
 
@@ -8,73 +8,69 @@ namespace ProgressTracker.Controllers;
 public class SubjectController : Controller
 {
     private readonly ISubjectService _subjectService;
-    
-    public SubjectController(ISubjectService subjectService)
+    private readonly ILogger<SubjectController> _logger;
+
+    public SubjectController(ISubjectService subjectService, ILogger<SubjectController> logger)
     {
+        _logger = logger;
         _subjectService = subjectService;
     }
-    
+
     // GET /Subject/
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        var viewModel = _subjectService.GetAll();
+        var viewModel = await _subjectService.GetAllForUser();
         return View(viewModel);
     }
-    
-    // GET /Subject/Edit/{id}
-    public IActionResult Edit(int id)
-    {
-        var viewModel = _subjectService.GetOneById(id);
-        return View(viewModel);
-    }
-    
-    // POST: Subject/Edit/{id}
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public Task<IActionResult> Edit(int id, SubjectModel subjectModel)
-    {
-        subjectModel.Id = id;
-        _subjectService.AddOne(subjectModel);
-        return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
-    }
-    
+
     // Get: Subject/Delete/{id}
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
         {
+            _logger.LogWarning($"ID not available to delete.");
             return NotFound();
         }
+
         return await DeleteConfirmed(id.Value);
     }
-    
+
     // Post: Subject/DeleteConfirmed/{id}
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        _subjectService.RemoveOne(id);
-        return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
+        await _subjectService.RemoveOne(id);
+        return RedirectToAction("Index", "Subject");
     }
-    
-    // GET /Subject/Create
+
+    // GET /Subject/Add
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Add()
     {
-        var model = new SubjectViewModel { };
+        var model = new SubjectAddModel { };
+        var subjects = await _subjectService.GetAll();
+        var selectListItems = subjects.Select(s => new SelectListItem
+        {
+            Value = s.Id.ToString(),
+            Text = s.Name
+        }).ToList();
+        ViewData["SubjectOptions"] = selectListItems;
         return View(model);
     }
 
-    // Post: Subject/Create/
+    // Post: Subject/Add/
     [HttpPost]
-    public Task<IActionResult> Create(SubjectViewModel? viewModel)
+    public async Task<IActionResult> Add(SubjectAddModel viewModel)
     {
-        if (ModelState.IsValid && viewModel != null)
+        if (ModelState.IsValid)
         {
-            var subjectModel = new SubjectModel(viewModel.Name, viewModel.Credits, viewModel.LearningHours);
-            _subjectService.AddOne(subjectModel);
-            return Task.FromResult<IActionResult>(RedirectToAction("Index", "Subject"));
+            await _subjectService.AddOne(viewModel);
+            return RedirectToAction("Index", "Subject");
         }
-        return Task.FromResult<IActionResult>(View(viewModel));
+        
+        
+        _logger.LogWarning($"Incomplete subject details to add the subject.");
+        return View(viewModel);
     }
 }

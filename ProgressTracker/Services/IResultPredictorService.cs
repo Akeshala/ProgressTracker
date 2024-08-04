@@ -6,6 +6,6 @@ namespace ProgressTracker.Services;
 public interface IResultPredictorService
 {
     
-    List<(int subjectId, string subjectName, TimeSpan learned, TimeSpan target, string grade, double level)>
-        GetPredictions(List<DailyRecordModel> dailyRecords);
+    Task<List<(int subjectId, string subjectName, TimeSpan learned, TimeSpan target, string grade, double level)>> GetPredictions(
+        List<DailyRecordModel> dailyRecords);
 }

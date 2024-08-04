@@ -29,7 +29,7 @@ public class WeeklyReportController : Controller
     }
 
     // Get /WeeklyReport/GenerateReport
-    public IActionResult Generate(DateTime date)
+    public async Task<IActionResult> Generate(DateTime date)
     {
         var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
         var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
@@ -43,7 +43,7 @@ public class WeeklyReportController : Controller
                 DailyRecordModel = dailyRecord,
                 Learned = _dailyRecordService.GetLearned(dailyRecord),
             }).ToList(),
-            WeeklySubjectReports = weeklySubjectReports.ToList(),
+            WeeklySubjectReports = await weeklySubjectReports,
             BreakTime = weeklyBreakTime,
             UntrackedTime = weeklyUntrackedTime,
             TrackedTime = weeklyTrackedTime,

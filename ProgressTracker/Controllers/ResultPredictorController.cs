@@ -18,11 +18,11 @@ public class ResultPredictorController : Controller
     }
 
     // Get /ResultPredictor/Index
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         var (firstDate, lastDate) = DateTimeLib.GetDayBeforeMonths(6);
         var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
-        var predictions = _resultPredictorService.GetPredictions(dailyRecords);
+        var predictions = await _resultPredictorService.GetPredictions(dailyRecords);
         
         var subjectReports = predictions.Select(kvp =>
         {
