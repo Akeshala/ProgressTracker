@@ -17,13 +17,14 @@ public class WeeklyReportService : IWeeklyReportService
         _dailyRecordService = dailyRecordService;
     }
 
-    public (Task<List<WeeklySubjectReportViewModel>> weeklySubjectReports, TimeSpan weeklyBreakTime, TimeSpan
-        weeklyUntrackedTime, TimeSpan weeklyTrackedTime) GetReport(List<DailyRecordModel> dailyRecords)
+    public async
+        Task<(List<WeeklySubjectReportViewModel> weeklySubjectReports, TimeSpan weeklyBreakTime, TimeSpan
+            weeklyUntrackedTime, TimeSpan weeklyTrackedTime)> GetReport(List<DailyRecordModel> dailyRecords)
     {
-        var weeklySubjectReports = GetWeeklySubjectReport(dailyRecords);
+        var weeklySubjectReports = await GetWeeklySubjectReport(dailyRecords);
         var weeklyBreakTime = GetWeeklyBreakTime(dailyRecords);
-        var weeklyUntrackedTime = GetWeeklyUntrackedTime(dailyRecords);
-        var weeklyTrackedTime = GetWeeklyTrackedTime(dailyRecords);
+        var weeklyUntrackedTime = await GetWeeklyUntrackedTime(dailyRecords);
+        var weeklyTrackedTime = await GetWeeklyTrackedTime(dailyRecords);
 
         return (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime);
     }
@@ -41,7 +42,7 @@ public class WeeklyReportService : IWeeklyReportService
         foreach (var dailyRecord in dailyRecords)
         {
             var sessionIds = dailyRecord.SessionIds;
-            var sessions = _sessionService.GetMultiByIds(sessionIds);
+            var sessions = await _sessionService.GetMultiByIds(sessionIds);
 
             foreach (var session in sessions)
             {
@@ -65,7 +66,7 @@ public class WeeklyReportService : IWeeklyReportService
                 Learned = kvp.Value
             };
         }).ToList();
-        
+
         var weeklySubjectReports = await Task.WhenAll(viewModelTasks);
 
         return weeklySubjectReports.ToList();
@@ -84,7 +85,7 @@ public class WeeklyReportService : IWeeklyReportService
             .Aggregate(breakTime, (current, dailyBreakTime) => current + dailyBreakTime);
     }
 
-    private TimeSpan GetWeeklyUntrackedTime(List<DailyRecordModel> dailyRecords)
+    private async Task<TimeSpan> GetWeeklyUntrackedTime(List<DailyRecordModel> dailyRecords)
     {
         if (dailyRecords.Count == 0)
         {
@@ -93,11 +94,20 @@ public class WeeklyReportService : IWeeklyReportService
 
         var unTrackedTime = new TimeSpan(0, 0, 0);
 
-        return dailyRecords.Select(_dailyRecordService.GetUntracked).Aggregate(unTrackedTime,
-            (current, dailyUntrackedTime) => current + dailyUntrackedTime);
+        // Get untracked times asynchronously
+        var untrackedTimesTasks = dailyRecords.Select(_dailyRecordService.GetUntracked).ToList();
+        var untrackedTimes = await Task.WhenAll(untrackedTimesTasks);
+
+        // Aggregate the untracked times
+        foreach (var dailyUntrackedTime in untrackedTimes)
+        {
+            unTrackedTime += dailyUntrackedTime;
+        }
+
+        return unTrackedTime;
     }
 
-    private TimeSpan GetWeeklyTrackedTime(List<DailyRecordModel> dailyRecords)
+    private async Task<TimeSpan> GetWeeklyTrackedTime(List<DailyRecordModel> dailyRecords)
     {
         if (dailyRecords.Count == 0)
         {
@@ -106,7 +116,16 @@ public class WeeklyReportService : IWeeklyReportService
 
         var trackedTime = new TimeSpan(0, 0, 0);
 
-        return dailyRecords.Select(_dailyRecordService.GetTracked).Aggregate(trackedTime,
-            (current, dailyTrackedTime) => current + dailyTrackedTime);
+        // Get tracked times asynchronously
+        var trackedTimesTasks = dailyRecords.Select(_dailyRecordService.GetTracked).ToList();
+        var trackedTimes = await Task.WhenAll(trackedTimesTasks);
+
+        // Aggregate the tracked times
+        foreach (var dailyTrackedTime in trackedTimes)
+        {
+            trackedTime += dailyTrackedTime;
+        }
+
+        return trackedTime;
     }
 }

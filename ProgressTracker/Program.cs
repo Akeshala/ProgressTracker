@@ -6,11 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<ISubjectService, SubjectService>();
-builder.Services.AddSingleton<IDailyRecordService, DailyRecordService>();
-builder.Services.AddSingleton<ISessionService, SessionService>();
-builder.Services.AddSingleton<IWeeklyReportService, WeeklyReportService>();
-builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
+builder.Services.AddScoped<ISessionService, SessionService>();
+builder.Services.AddScoped<IWeeklyReportService, WeeklyReportService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Retrieve the token from configuration or environment variable
 string token =

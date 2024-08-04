@@ -18,7 +18,7 @@ public class ResultPredictorService : IResultPredictorService
         Task<List<(int subjectId, string subjectName, TimeSpan learned, TimeSpan target, string grade, double level)>>
         GetPredictions(List<DailyRecordModel> dailyRecords)
     {
-        var learnedTimeBySubjectId = GetLearnedTimeBySubjectIds(dailyRecords);
+        var learnedTimeBySubjectId = await GetLearnedTimeBySubjectIds(dailyRecords);
         var subjectReportsTasks = learnedTimeBySubjectId.Select(async kvp =>
         {
             var subject = await _subjectService.GetOneById(kvp.Key);
@@ -39,7 +39,7 @@ public class ResultPredictorService : IResultPredictorService
         return subjectReports.ToList();
     }
 
-    private Dictionary<int, TimeSpan> GetLearnedTimeBySubjectIds(List<DailyRecordModel> dailyRecords)
+    private async Task<Dictionary<int, TimeSpan>> GetLearnedTimeBySubjectIds(List<DailyRecordModel> dailyRecords)
     {
         if (dailyRecords.Count == 0)
         {
@@ -51,7 +51,7 @@ public class ResultPredictorService : IResultPredictorService
         foreach (var dailyRecord in dailyRecords)
         {
             var sessionIds = dailyRecord.SessionIds;
-            var sessions = _sessionService.GetMultiByIds(sessionIds);
+            var sessions = await _sessionService.GetMultiByIds(sessionIds);
 
             foreach (var session in sessions)
             {

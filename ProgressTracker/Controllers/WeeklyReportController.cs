@@ -35,17 +35,19 @@ public class WeeklyReportController : Controller
     {
         var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
         var dailyRecords = _dailyRecordService.GetAllInRange(firstDate, lastDate);
-        var (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime) =
+        var (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime) = await 
             _weeklyReportService.GetReport(dailyRecords);
+        var dailyRecordTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel
+        {
+            DailyRecordModel = dailyRecord,
+            Learned = await _dailyRecordService.GetLearned(dailyRecord),
+        });
+        var dailyRecordViews = await Task.WhenAll(dailyRecordTasks);
         var viewModel = new WeeklyReportGeneratedViewModel
         {
             Date = DateTime.Today,
-            DailyRecords = dailyRecords.Select(dailyRecord => new DailyRecordViewModel
-            {
-                DailyRecordModel = dailyRecord,
-                Learned = _dailyRecordService.GetLearned(dailyRecord),
-            }).ToList(),
-            WeeklySubjectReports = await weeklySubjectReports,
+            DailyRecords = dailyRecordViews.ToList(),
+            WeeklySubjectReports = weeklySubjectReports,
             BreakTime = weeklyBreakTime,
             UntrackedTime = weeklyUntrackedTime,
             TrackedTime = weeklyTrackedTime,

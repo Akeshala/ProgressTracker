@@ -21,7 +21,7 @@ public class SessionController : Controller
     // GET /Session/
     public async Task<IActionResult> Index()
     {
-        var sessions = _sessionService.GetAll();
+        var sessions = await _sessionService.GetAll();
         var viewModelTasks = sessions.Select(async session =>
         {
             var subject = await _subjectService.GetOneById(session.SubjectId);
@@ -51,7 +51,7 @@ public class SessionController : Controller
         }
         
         var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
-        var session = _sessionService.GetOneById(id);
+        var session = await _sessionService.GetOneById(id);
         if (session == null)
         {
             return RedirectToAction("Index");
@@ -74,19 +74,19 @@ public class SessionController : Controller
     // POST: Subject/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public Task<IActionResult> Edit(int id, SessionViewEditModel? viewModel)
+    public async Task<IActionResult> Edit(int id, SessionViewEditModel? viewModel)
     {
-        var session = _sessionService.GetOneById(id);
+        var session = await _sessionService.GetOneById(id);
         if (viewModel == null || session == null)
         {
-            return Task.FromResult<IActionResult>(NotFound());
+            return await Task.FromResult<IActionResult>(NotFound());
         }
         
         var hours = viewModel.Hours;
         var minutes = viewModel.Minutes;
         session.Time = new TimeSpan(hours, minutes, 0);
         session.SubjectId = viewModel.SubjectSelectedValue;
-        return Task.FromResult<IActionResult>(RedirectToAction("Index", "DailyRecord"));
+        return await Task.FromResult<IActionResult>(RedirectToAction("Index", "DailyRecord"));
     }
     
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

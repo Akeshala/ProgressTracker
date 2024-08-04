@@ -1,73 +1,43 @@
+using Microsoft.EntityFrameworkCore;
+using ProgressTracker.Data;
 using ProgressTracker.Models;
 
 namespace ProgressTracker.Services
 {
     public class SessionService : ISessionService
     {
-        private static readonly Dictionary<int, SessionModel> Sessions = new Dictionary<int, SessionModel>();
-        private static int _nextId = 0;
-        private static readonly object Lock = new object();
-        private static bool _initialized = false;
+        private readonly AppDbContext _context;
+        private readonly ILogger<SessionService> _logger;
 
-        public SessionService()
+        public SessionService(AppDbContext context, ILogger<SessionService> logger)
         {
-            InitializeSubjects();
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private void InitializeSubjects()
+        public async Task<IEnumerable<SessionModel>> GetAll()
         {
-            if (_initialized) return;
-
-            lock (Lock)
+            var sessions = await _context.Sessions.ToListAsync();
+            if (sessions.Count == 0)
             {
-                if (_initialized) return;
-
-                AddOne(new SessionModel(7, 1, 30));
-                AddOne(new SessionModel(1, 2, 45));
-                AddOne(new SessionModel(2, 3, 15));
-                AddOne(new SessionModel(3, 4, 0));
-                AddOne(new SessionModel(4, 3, 30));
-                AddOne(new SessionModel(5, 2, 45));
-                AddOne(new SessionModel(6, 3, 0));
-                AddOne(new SessionModel(1, 3, 30));
-                AddOne(new SessionModel(2, 4, 45));
-                AddOne(new SessionModel(3, 1, 15));
-                AddOne(new SessionModel(4, 0, 0));
-                AddOne(new SessionModel(5, 1, 30));
-                AddOne(new SessionModel(6, 0, 45));
-                AddOne(new SessionModel(7, 1, 0));
-                AddOne(new SessionModel(1, 2, 30));
-                AddOne(new SessionModel(2, 0, 45));
-                AddOne(new SessionModel(3, 1, 15));
-                AddOne(new SessionModel(4, 1, 0));
-                AddOne(new SessionModel(5, 1, 30));
-                AddOne(new SessionModel(6, 2, 45));
-                AddOne(new SessionModel(7, 1, 0));
-                AddOne(new SessionModel(1, 3, 30));
-                AddOne(new SessionModel(2, 2, 45));
-                AddOne(new SessionModel(3, 3, 15));
-                AddOne(new SessionModel(4, 1, 0)); //25
-
-                _initialized = true;
+                _logger.LogWarning($"No session found.");
+                return new List<SessionModel>();
             }
+            return sessions.ToList();
         }
 
-        public IEnumerable<SessionModel> GetAll()
+        public async Task<SessionModel?> GetOneById(int id)
         {
-            return Sessions.Values.ToList();
-        }
-
-        public SessionModel? GetOneById(int id)
-        {
-            return Sessions.GetValueOrDefault(id);
+            var session = await _context.Sessions.FindAsync(id);
+            return session;
         }
         
-        public IEnumerable<SessionModel> GetMultiByIds(IEnumerable<int> sessionIds)
+        public async Task<IEnumerable<SessionModel>> GetMultiByIds(IEnumerable<int> sessionIds)
         {
             var result = new List<SessionModel>();
             foreach (var sessionId in sessionIds)
             {
-                Sessions.TryGetValue(sessionId, out var session);
+                var session = await _context.Sessions.FindAsync(sessionId);
                 if (session != null)
                 {
                     result.Add(session);
@@ -76,30 +46,26 @@ namespace ProgressTracker.Services
             return result;
         }
 
-        public void AddOne(SessionModel? session)
+        public async void AddOne(SessionModel? session)
         {
             if (session != null)
             {
-                if (session.Id == 0)
-                {
-                    session.Id = GenerateUniqueId();
-                    Sessions[session.Id] = session;
-                }
-                else
-                {
-                    Sessions[session.Id] = session;
-                }
+                await _context.Sessions.AddAsync(session);
+                await _context.SaveChangesAsync();
             }
         }
 
-        public void RemoveOne(int id)
+        public async Task<bool> RemoveOne(int id)
         {
-            Sessions.Remove(id);
-        }
-
-        private int GenerateUniqueId()
-        {
-            return ++_nextId;
+            var session = await _context.Sessions.FindAsync(id);
+            if (session == null)
+            {
+                return false;
+            }
+            
+            _context.Sessions.Remove(session);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

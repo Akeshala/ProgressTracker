@@ -9,9 +9,9 @@ namespace ProgressTracker.Services
         void RemoveOne(int id);
         void AddOne(DailyRecordModel dailyRecord);
         List<DailyRecordModel> GetAllInRange(DateTime startDate, DateTime endDate);
-        TimeSpan GetLearned(DailyRecordModel dailyRecord);
-        TimeSpan GetUntracked(DailyRecordModel dailyRecord);
-        TimeSpan GetTracked(DailyRecordModel dailyRecord);
-        TimeSpan GetRecorded(DailyRecordModel dailyRecord);
+        Task<TimeSpan> GetLearned(DailyRecordModel dailyRecord);
+        Task<TimeSpan> GetUntracked(DailyRecordModel dailyRecord);
+        Task<TimeSpan> GetTracked(DailyRecordModel dailyRecord);
+        Task<TimeSpan> GetRecorded(DailyRecordModel dailyRecord);
     }
 }
