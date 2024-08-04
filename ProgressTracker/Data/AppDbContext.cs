@@ -5,7 +5,7 @@ namespace ProgressTracker.Data
 {
     public class AppDbContext : DbContext
     {
-        // public DbSet<DailyRecordModel> DailyRecords { get; set; }
+        public DbSet<DailyRecordModel> DailyRecords { get; set; }
         public DbSet<SessionModel> Sessions { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
@@ -16,9 +16,9 @@ namespace ProgressTracker.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // modelBuilder.Entity<DailyRecordModel>()
-            //     .HasIndex(u => new {u.UserId, u.Date})
-            //     .IsUnique();
+            modelBuilder.Entity<DailyRecordModel>()
+                .HasIndex(u => new {u.UserId, u.Date})
+                .IsUnique();
 
             modelBuilder.Entity<SessionModel>();
         }
