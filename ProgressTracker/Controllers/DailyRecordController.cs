@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
 using ProgressTracker.Services;
+using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.DailyRecord;
 using ProgressTracker.ViewModels.Session;
 
@@ -36,7 +38,13 @@ public class DailyRecordController : Controller
     // GET /DailyRecord/Create
     public async Task<IActionResult> Create()
     {
-        var subjects = await _subjectService.GetAllForUser();
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
         var model = new AddDailyRecordViewModel
         {
             SubjectOptions = subjects.Select(subject => new SelectListItem
@@ -79,6 +87,12 @@ public class DailyRecordController : Controller
         {
             return NotFound();
         }
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         try
         {
@@ -93,7 +107,7 @@ public class DailyRecordController : Controller
                 if (breakTimeSpan > dailyRecord.GetTarget())
                 {
                     TempData["Error"] = "Break can not be larger than Target!";
-                    var subjects = await _subjectService.GetAllForUser();
+                    var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
                     viewModel.SubjectOptions = subjects.Select(subject => new SelectListItem
                     {
                         Value = subject.Id.ToString(),
@@ -119,7 +133,7 @@ public class DailyRecordController : Controller
                     if (newSession.Time + dailyRecord.Break > dailyRecord.Target)
                     {
                         TempData["Error"] = "Break and Session durations can not be larger than daily target!";
-                        var subjects = await _subjectService.GetAllForUser();
+                        var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
                         viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                         {
                             Value = sbj.Id.ToString(),
@@ -147,7 +161,14 @@ public class DailyRecordController : Controller
     // GET /DailyRecord/Edit/{id}
     public async Task<IActionResult> Edit(int id)
     {
-        var subjects = await _subjectService.GetAllForUser();
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
+        var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
         var dailyRecord = _dailyRecordService.GetOneById(id);
 
         if (dailyRecord == null)
@@ -193,6 +214,12 @@ public class DailyRecordController : Controller
         {
             return await Task.FromResult<IActionResult>(NotFound());
         }
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         var newDailyRecord = viewModel.DailyRecord;
         var dailyRecord = _dailyRecordService.GetOneById(id);
@@ -213,7 +240,7 @@ public class DailyRecordController : Controller
             if (breakTimeSpan + _dailyRecordService.GetLearned(dailyRecord) > dailyRecord.GetTarget())
             {
                 ViewData["Error"] = "Adding this Break exceeds daily Target";
-                var subjects = await _subjectService.GetAllForUser();
+                var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
                 viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                 {
                     Value = sbj.Id.ToString(),
@@ -253,7 +280,7 @@ public class DailyRecordController : Controller
                 if (sessionTimeSpan + _dailyRecordService.GetRecorded(dailyRecord) > dailyRecord.GetTarget())
                 {
                     ViewData["Error"] = "Adding this Session exceeds daily Target";
-                    var subjects = await _subjectService.GetAllForUser();
+                    var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
                     viewModel.SubjectOptions = subjects.Select(sbj => new SelectListItem
                     {
                         Value = sbj.Id.ToString(),
@@ -284,5 +311,11 @@ public class DailyRecordController : Controller
         }
 
         return await Task.FromResult<IActionResult>(RedirectToAction("Edit", "DailyRecord", dailyRecord.Id));
+    }
+    
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

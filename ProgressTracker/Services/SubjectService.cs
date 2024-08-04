@@ -26,9 +26,9 @@ namespace ProgressTracker.Services
             return new List<SubjectViewModel>();
         }
 
-        public async Task<List<SubjectViewModel>> GetAllForUser()
+        public async Task<List<SubjectViewModel>> GetAllForUser(int userId)
         {
-            var subjectResponse = await _httpClient.GetAsync("subject/all/1");
+            var subjectResponse = await _httpClient.GetAsync($"subject/all/{userId}");
             if (subjectResponse.IsSuccessStatusCode)
             {
                 return await subjectResponse.Content.ReadFromJsonAsync<List<SubjectViewModel>>() ??
@@ -66,9 +66,9 @@ namespace ProgressTracker.Services
             }
         }
 
-        public async Task<bool> RemoveOne(int id)
+        public async Task<bool> RemoveOne(int id, int userId)
         {
-            var response = await _httpClient.DeleteAsync($"subject/remove/{id}/1");
+            var response = await _httpClient.DeleteAsync($"subject/remove/{id}/{userId}");
             if (response.IsSuccessStatusCode)
             {
                 return true;

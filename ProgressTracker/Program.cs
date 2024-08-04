@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using ProgressTracker.Data;
 using ProgressTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,10 +10,11 @@ builder.Services.AddSingleton<ISubjectService, SubjectService>();
 builder.Services.AddSingleton<IDailyRecordService, DailyRecordService>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddSingleton<IWeeklyReportService, WeeklyReportService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 
 // Retrieve the token from configuration or environment variable
-string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJha2VzaGFsYUBnbWFpbC5jb20iLCJqdGkiOiJmNzVhNzg1Zi1kNDQ4LTRmOWYtOTI5Yy1hYjAxNjIwYTkyMjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJleHAiOjE3MjI3NTc0NTIsImlzcyI6InlvdXJkb21haW4uY29tIiwiYXVkIjoieW91cmRvbWFpbi5jb20ifQ.VLkxM_M5E69VXmuQlog6GCHU-efe2jJ0CYnMXxlH_WI";
-
+string token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwianRpIjoiMzc5MTQyMzQtMGIwMS00NjI4LWJjMjQtMDc3MTBjOWVjNjBjIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiIxIiwiZXhwIjoxNzIyNzk0OTY0LCJpc3MiOiJ5b3VyZG9tYWluLmNvbSIsImF1ZCI6InlvdXJkb21haW4uY29tIn0.ZyiY-5jN8sCYwQ-KD2_WNu9BQcb1dQTwgi9uoIei6i0";
 builder.Services.AddHttpClient("ProgressTrackerUserService", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5058/");
@@ -25,6 +28,10 @@ builder.Services.AddHttpClient("ProgressTrackerSubjectService", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 });
+
+// Configure Database Context
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

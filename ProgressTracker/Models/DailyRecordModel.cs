@@ -1,10 +1,21 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ProgressTracker.Models
 {
     public class DailyRecordModel
     {
         public static readonly int DailyTarget = 8;
+        
+        [Key]
         public int Id { get; set; }
+        
+        // [Required]
+        public int UserId { get; set; }
+        
+        // [Required]
         public DateTime Date { get; set; }
+        
+        // [Required]
         public TimeSpan Target { get; set; }
         public TimeSpan Break { get; set; }
         public List<int> SessionIds { get; }

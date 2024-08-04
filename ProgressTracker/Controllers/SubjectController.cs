@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Services;
+using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Controllers;
@@ -19,7 +21,14 @@ public class SubjectController : Controller
     // GET /Subject/
     public async Task<IActionResult> Index()
     {
-        var viewModel = await _subjectService.GetAllForUser();
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
+        var viewModel = await _subjectService.GetAllForUser(int.Parse(userId));
         return View(viewModel);
     }
 
@@ -40,7 +49,14 @@ public class SubjectController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        await _subjectService.RemoveOne(id);
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
+        await _subjectService.RemoveOne(id, int.Parse(userId));
         return RedirectToAction("Index", "Subject");
     }
 
@@ -63,8 +79,16 @@ public class SubjectController : Controller
     [HttpPost]
     public async Task<IActionResult> Add(SubjectAddModel viewModel)
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         if (ModelState.IsValid)
         {
+            viewModel.UserId = int.Parse(userId);
             await _subjectService.AddOne(viewModel);
             return RedirectToAction("Index", "Subject");
         }
@@ -72,5 +96,11 @@ public class SubjectController : Controller
         
         _logger.LogWarning($"Incomplete subject details to add the subject.");
         return View(viewModel);
+    }
+    
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

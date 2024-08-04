@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Services;
 using ProgressTracker.Utils;
+using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.DailyRecord;
 using ProgressTracker.ViewModels.WeeklyReport;
 
@@ -53,5 +55,11 @@ public class WeeklyReportController : Controller
                               + lastDate.ToString(DateTimeLib.Ymd);
 
         return View(viewModel);
+    }
+    
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

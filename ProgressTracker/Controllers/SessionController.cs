@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
 using ProgressTracker.Services;
+using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
@@ -41,7 +43,14 @@ public class SessionController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var subjects = await _subjectService.GetAllForUser();
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
+        var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
         var session = _sessionService.GetOneById(id);
         if (session == null)
         {
@@ -78,5 +87,11 @@ public class SessionController : Controller
         session.Time = new TimeSpan(hours, minutes, 0);
         session.SubjectId = viewModel.SubjectSelectedValue;
         return Task.FromResult<IActionResult>(RedirectToAction("Index", "DailyRecord"));
+    }
+    
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

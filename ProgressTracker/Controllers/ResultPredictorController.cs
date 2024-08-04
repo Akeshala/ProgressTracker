@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Services;
 using ProgressTracker.Utils;
+using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.ResultPredictor;
 
 namespace ProgressTracker.Controllers;
@@ -45,5 +47,11 @@ public class ResultPredictorController : Controller
             LastDate = lastDate,
         };
         return View(viewModel);
+    }
+    
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

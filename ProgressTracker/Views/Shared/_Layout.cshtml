@@ -17,6 +17,8 @@
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            @if (ViewContext.RouteData.Values["controller"].ToString() != "Login")
+            {
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
@@ -39,6 +41,7 @@
                     </li>
                 </ul>
             </div>
+            }
         </div>
     </nav>
 </header>
