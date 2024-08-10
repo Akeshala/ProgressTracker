@@ -71,8 +71,16 @@ namespace ProgressTracker.Models
 
         public void AddOneSessionId(int sessionId)
         {
-            SessionIds.Add(sessionId);
+            if (string.IsNullOrEmpty(SessionIdsString))
+            {
+                SessionIdsString = sessionId.ToString();
+            }
+            else
+            {
+                SessionIdsString += "," + sessionId;
+            }
         }
+
 
         public TimeSpan GetTarget()
         {

@@ -7,7 +7,7 @@ namespace ProgressTracker.Services
         Task<IEnumerable<SessionModel>> GetAll();
         Task<SessionModel?> GetOneById(int id);
         Task<bool> RemoveOne(int id);
-        void AddOne(SessionModel sessionModel);
+        Task AddOne(SessionModel sessionModel);
         Task<IEnumerable<SessionModel>> GetMultiByIds(IEnumerable<int> sessionIds);
     }
 }

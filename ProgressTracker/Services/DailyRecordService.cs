@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ProgressTracker.Data;
 using ProgressTracker.Models;
 
@@ -16,11 +17,12 @@ namespace ProgressTracker.Services
             _context = context;
         }
 
-        public List<DailyRecordModel> GetAll()
+        public async Task<List<DailyRecordModel>> GetAll()
         {
             try
             {
-                return _context.DailyRecords.ToList();
+                var dailyRecords = await _context.DailyRecords.ToListAsync();
+                return dailyRecords.ToList();
             }
             catch (Exception ex)
             {
@@ -29,9 +31,9 @@ namespace ProgressTracker.Services
             }
         }
 
-        public List<DailyRecordModel> GetAllByUser(int userId)
+        public async Task<List<DailyRecordModel>> GetAllByUser(int userId)
         {
-            return GetAll().Where(record => record.UserId == userId).ToList();
+            return await _context.DailyRecords.Where(record => record.UserId == userId).ToListAsync();
         }
 
         public async Task<DailyRecordModel?> GetOneById(int id)
@@ -53,7 +55,7 @@ namespace ProgressTracker.Services
             {
                 try
                 {
-                    var existingRecord = GetRecordForDate(dailyRecord.Date);
+                    var existingRecord = await GetRecordForDate(dailyRecord.Date);
                     if (existingRecord != null)
                     {
                         throw new Exception("Duplicate records found for that day! Edit the existing record.");
@@ -68,6 +70,12 @@ namespace ProgressTracker.Services
                     throw;
                 }
             }
+        }
+
+        public Task SaveChanges()
+        {
+            _context.SaveChanges();
+            return Task.CompletedTask;
         }
 
         public async Task<bool> RemoveOne(int id)
@@ -91,18 +99,18 @@ namespace ProgressTracker.Services
             }
         }
 
-        public List<DailyRecordModel> GetAllInRange(DateTime startDate, DateTime endDate)
+        public async Task<List<DailyRecordModel>> GetAllInRange(DateTime startDate, DateTime endDate)
         {
-            return GetAll()
+            return await _context.DailyRecords
                 .Where(record => record.Date >= startDate && record.Date <= endDate)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<DailyRecordModel> GetAllInRangeByUser(DateTime startDate, DateTime endDate, int userId)
+        public async Task<List<DailyRecordModel>> GetAllInRangeByUser(DateTime startDate, DateTime endDate, int userId)
         {
-            return GetAll()
+            return await _context.DailyRecords
                 .Where(record => record.Date >= startDate && record.Date <= endDate && record.UserId == userId)
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<TimeSpan> GetLearned(DailyRecordModel dailyRecord)
@@ -140,9 +148,9 @@ namespace ProgressTracker.Services
             }
         }
 
-        private DailyRecordModel? GetRecordForDate(DateTime date)
+        private async Task<DailyRecordModel?> GetRecordForDate(DateTime date)
         {
-            return GetAll().FirstOrDefault(record => record.Date == date);
+            return await _context.DailyRecords.FirstOrDefaultAsync(record => record.Date == date);
         }
     }
 }

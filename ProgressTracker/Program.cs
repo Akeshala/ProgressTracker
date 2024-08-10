@@ -11,10 +11,12 @@ builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IWeeklyReportService, WeeklyReportService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IResultPredictorService, ResultPredictorService>();
 
 // Retrieve the token from configuration or environment variable
 string token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwianRpIjoiMzc5MTQyMzQtMGIwMS00NjI4LWJjMjQtMDc3MTBjOWVjNjBjIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiIxIiwiZXhwIjoxNzIyNzk0OTY0LCJpc3MiOiJ5b3VyZG9tYWluLmNvbSIsImF1ZCI6InlvdXJkb21haW4uY29tIn0.ZyiY-5jN8sCYwQ-KD2_WNu9BQcb1dQTwgi9uoIei6i0";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwianRpIjoiMzRmMTBkY2QtOGI0YS00ODBjLWIxNTgtZjA5NjgxNTQ5NTdhIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiIxIiwiZXhwIjoxNzIzMzEyNzU3LCJpc3MiOiJ5b3VyZG9tYWluLmNvbSIsImF1ZCI6InlvdXJkb21haW4uY29tIn0.vCvCSMItFKbeLETXN63ltDrJ4kNRvlcM7Cz5cJuz74k";
+
 builder.Services.AddHttpClient("ProgressTrackerUserService", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5058/");

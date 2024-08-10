@@ -46,7 +46,7 @@ namespace ProgressTracker.Services
             return result;
         }
 
-        public async void AddOne(SessionModel? session)
+        public async Task AddOne(SessionModel? session)
         {
             if (session != null)
             {

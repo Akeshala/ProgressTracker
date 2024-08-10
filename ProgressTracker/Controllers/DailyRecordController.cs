@@ -32,14 +32,20 @@ public class DailyRecordController : Controller
         {
             return Unauthorized();
         }
-        var dailyRecords = _dailyRecordService.GetAllByUser(int.Parse(userId));
-        var viewModelTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel
+        
+        var dailyRecords = await _dailyRecordService.GetAllByUser(int.Parse(userId));
+        var viewModelList = new List<DailyRecordViewModel>();
+        foreach (var dailyRecord in dailyRecords)
         {
-            DailyRecordModel = dailyRecord,
-            Learned = await _dailyRecordService.GetLearned(dailyRecord),
-        }).ToList();
-        var viewModel = await Task.WhenAll(viewModelTasks);
-        return View(viewModel);
+            var learned = await _dailyRecordService.GetLearned(dailyRecord);
+            viewModelList.Add(new DailyRecordViewModel
+            {
+                DailyRecordModel = dailyRecord,
+                Learned = learned,
+            });
+        }
+
+        return View(viewModelList);
     }
 
     // GET /DailyRecord/Create
@@ -150,12 +156,12 @@ public class DailyRecordController : Controller
                         return View(viewModel);
                     }
 
-                    _sessionService.AddOne(newSession);
+                    await _sessionService.AddOne(newSession);
                     dailyRecord.AddOneSessionId(newSession.Id);
                 }
             }
 
-            _dailyRecordService.AddOne(dailyRecord);
+            await _dailyRecordService.AddOne(dailyRecord);
             TempData["Message"] = "Record created successfully!";
         }
         catch (Exception ex)
@@ -318,8 +324,9 @@ public class DailyRecordController : Controller
                 }
 
                 var newSession = new SessionModel(subject.Id, subjectHours, subjectMinutes);
-                _sessionService.AddOne(newSession);
+                await _sessionService.AddOne(newSession);
                 dailyRecord.AddOneSessionId(newSession.Id);
+                await _dailyRecordService.SaveChanges();
             }
         }
 

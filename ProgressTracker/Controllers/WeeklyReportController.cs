@@ -41,7 +41,7 @@ public class WeeklyReportController : Controller
         }
         
         var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
-        var dailyRecords = _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
+        var dailyRecords = await _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
         var (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime) = await 
             _weeklyReportService.GetReport(dailyRecords);
         var dailyRecordTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel

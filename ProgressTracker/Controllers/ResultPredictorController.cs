@@ -30,7 +30,7 @@ public class ResultPredictorController : Controller
         }
         
         var (firstDate, lastDate) = DateTimeLib.GetDayBeforeMonths(6);
-        var dailyRecords = _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
+        var dailyRecords = await _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
         var predictions = await _resultPredictorService.GetPredictions(dailyRecords);
         
         var subjectReports = predictions.Select(kvp =>
