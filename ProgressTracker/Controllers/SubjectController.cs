@@ -2,11 +2,13 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Services;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Subject;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class SubjectController : Controller
 {
     private readonly ISubjectService _subjectService;
@@ -35,6 +37,13 @@ public class SubjectController : Controller
     // Get: Subject/Delete/{id}
     public async Task<IActionResult> Delete(int? id)
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         if (id == null)
         {
             _logger.LogWarning($"ID not available to delete.");
@@ -64,6 +73,13 @@ public class SubjectController : Controller
     [HttpGet]
     public async Task<IActionResult> Add()
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var model = new SubjectAddModel { };
         var subjects = await _subjectService.GetAll();
         var selectListItems = subjects.Select(s => new SelectListItem

@@ -8,6 +8,7 @@ using ProgressTracker.ViewModels.WeeklyReport;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class WeeklyReportController : Controller
 {
     private readonly IDailyRecordService _dailyRecordService;
@@ -23,6 +24,13 @@ public class WeeklyReportController : Controller
     [HttpGet]
     public IActionResult Index()
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var viewModel = new WeeklyReportViewModel
         {
             Date = DateTime.Today

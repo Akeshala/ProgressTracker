@@ -7,6 +7,7 @@ using ProgressTracker.ViewModels.ResultPredictor;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class ResultPredictorController : Controller
 {
     private readonly IDailyRecordService _dailyRecordService;

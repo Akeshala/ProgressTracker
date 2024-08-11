@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Profile;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class ProfileController : Controller
 {
     // GET /Profile/

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ProgressTracker.Services;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Login;
 
@@ -34,6 +35,13 @@ public class LoginController : Controller
                 if (userId != null)
                 {
                     HttpContext.Response.Cookies.Append("userId", userId, new CookieOptions
+                    {
+                        HttpOnly = true,       // Prevents JavaScript access to the cookie
+                        Secure = false,         // Ensures the cookie is sent only over HTTPS disabled
+                        SameSite = SameSiteMode.Strict, // Helps to mitigate CSRF attacks
+                        Expires = DateTime.UtcNow.AddMinutes(300) // Set the expiration time
+                    });
+                    HttpContext.Response.Cookies.Append("token", token, new CookieOptions
                     {
                         HttpOnly = true,       // Prevents JavaScript access to the cookie
                         Secure = false,         // Ensures the cookie is sent only over HTTPS disabled
@@ -78,5 +86,18 @@ public class LoginController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+    
+    [AuthorizeToken]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Logout()
+    {
+        // Remove the authentication cookies
+        HttpContext.Response.Cookies.Delete("userId");
+        HttpContext.Response.Cookies.Delete("token");
+
+        // Redirect to the login page
+        return RedirectToAction("Index", "Login");
     }
 }

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
 using ProgressTracker.Services;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class SessionController : Controller
 {
     private readonly ISubjectService _subjectService;
@@ -21,6 +23,13 @@ public class SessionController : Controller
     // GET /Session/
     public async Task<IActionResult> Index()
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var sessions = await _sessionService.GetAll();
         var viewModelTasks = sessions.Select(async session =>
         {
@@ -71,11 +80,18 @@ public class SessionController : Controller
         return View(model);
     }
 
-    // POST: Subject/Edit/{id}
+    // POST: Session/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, SessionViewEditModel? viewModel)
     {
+        // Extract user ID from cookies
+        string? userId = HttpContext.Request.Cookies["userId"];
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        
         var session = await _sessionService.GetOneById(id);
         if (viewModel == null || session == null)
         {

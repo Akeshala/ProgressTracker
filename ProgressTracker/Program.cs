@@ -1,35 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using ProgressTracker.Data;
 using ProgressTracker.Services;
+using ProgressTracker.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options => { options.Filters.Add<AuthorizeTokenAttribute>(); });
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IDailyRecordService, DailyRecordService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IWeeklyReportService, WeeklyReportService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResultPredictorService, ResultPredictorService>();
-
-// Retrieve the token from configuration or environment variable
-string token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwianRpIjoiMzRmMTBkY2QtOGI0YS00ODBjLWIxNTgtZjA5NjgxNTQ5NTdhIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiIxIiwiZXhwIjoxNzIzMzEyNzU3LCJpc3MiOiJ5b3VyZG9tYWluLmNvbSIsImF1ZCI6InlvdXJkb21haW4uY29tIn0.vCvCSMItFKbeLETXN63ltDrJ4kNRvlcM7Cz5cJuz74k";
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<AuthTokenHandler>();
 
 builder.Services.AddHttpClient("ProgressTrackerUserService", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5058/");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-});
+}).AddHttpMessageHandler<AuthTokenHandler>();
 
 builder.Services.AddHttpClient("ProgressTrackerSubjectService", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5106/");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-});
+}).AddHttpMessageHandler<AuthTokenHandler>();
 
 // Configure Database Context
 builder.Services.AddDbContext<AppDbContext>(options =>

@@ -1,9 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class PrivacyController : Controller
 {
     // GET /Privacy/

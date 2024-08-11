@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProgressTracker.Models;
 using ProgressTracker.Services;
+using ProgressTracker.Utils;
 using ProgressTracker.ViewModels;
 using ProgressTracker.ViewModels.DailyRecord;
 using ProgressTracker.ViewModels.Session;
 
 namespace ProgressTracker.Controllers;
 
+[AuthorizeToken]
 public class DailyRecordController : Controller
 {
     private readonly ISubjectService _subjectService;
@@ -57,6 +59,7 @@ public class DailyRecordController : Controller
         {
             return Unauthorized();
         }
+        
         var subjects = await _subjectService.GetAllForUser(int.Parse(userId));
         var model = new AddDailyRecordViewModel
         {
@@ -96,10 +99,6 @@ public class DailyRecordController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(AddDailyRecordViewModel viewModel)
     {
-        // if (!ModelState.IsValid)
-        // {
-        //     return NotFound();
-        // }
         // Extract user ID from cookies
         string? userId = HttpContext.Request.Cookies["userId"];
         if (userId == null)
@@ -168,8 +167,8 @@ public class DailyRecordController : Controller
         {
             TempData["Message"] = ex.Message;
         }
-
-        return RedirectToAction("Index", "DailyRecord");
+        
+        return RedirectToAction("Edit", "DailyRecord", new { id = viewModel.DailyRecord.Id });
     }
 
     // GET /DailyRecord/Edit/{id}
