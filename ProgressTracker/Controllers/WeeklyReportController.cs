@@ -30,7 +30,7 @@ public class WeeklyReportController : Controller
         {
             return Unauthorized();
         }
-        
+
         var viewModel = new WeeklyReportViewModel
         {
             Date = DateTime.Today
@@ -47,17 +47,32 @@ public class WeeklyReportController : Controller
         {
             return Unauthorized();
         }
-        
+
         var (firstDate, lastDate) = DateTimeLib.GetFirstAndLastDateOfWeek(date);
-        var dailyRecords = await _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
-        var (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime) = await 
-            _weeklyReportService.GetReport(dailyRecords);
-        var dailyRecordTasks = dailyRecords.Select(async dailyRecord => new DailyRecordViewModel
+
+        // Fetch daily records asynchronously
+        var dailyRecordsTask = _dailyRecordService.GetAllInRangeByUser(firstDate, lastDate, int.Parse(userId));
+
+        // Fetch report asynchronously
+        var reportTask = dailyRecordsTask.ContinueWith(async task =>
+        {
+            var localDailyRecords = task.Result;
+            var report = await _weeklyReportService.GetReport(localDailyRecords);
+            return (dailyRecords: localDailyRecords, report);
+        }).Unwrap();
+
+        var (dailyRecords, (weeklySubjectReports, weeklyBreakTime, weeklyUntrackedTime, weeklyTrackedTime)) =
+            await reportTask;
+
+        // Create tasks to fetch learned information in parallel
+        var dailyRecordTasks = dailyRecords.Select(dailyRecord => Task.Run(async () => new DailyRecordViewModel
         {
             DailyRecordModel = dailyRecord,
             Learned = await _dailyRecordService.GetLearned(dailyRecord),
-        });
+        }));
+
         var dailyRecordViews = await Task.WhenAll(dailyRecordTasks);
+
         var viewModel = new WeeklyReportGeneratedViewModel
         {
             Date = DateTime.Today,
@@ -73,7 +88,7 @@ public class WeeklyReportController : Controller
 
         return View(viewModel);
     }
-    
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
