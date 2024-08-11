@@ -31,16 +31,9 @@ public class LoginController : Controller
             var token = await _userService.LoginWithPassword(model);
             if (token != null)
             {
-                var userId = _userService.GetUserIdFromToken(token);
+                var userId = UserService.GetUserIdFromToken(token);
                 if (userId != null)
                 {
-                    HttpContext.Response.Cookies.Append("userId", userId, new CookieOptions
-                    {
-                        HttpOnly = true,       // Prevents JavaScript access to the cookie
-                        Secure = false,         // Ensures the cookie is sent only over HTTPS disabled
-                        SameSite = SameSiteMode.Strict, // Helps to mitigate CSRF attacks
-                        Expires = DateTime.UtcNow.AddMinutes(300) // Set the expiration time
-                    });
                     HttpContext.Response.Cookies.Append("token", token, new CookieOptions
                     {
                         HttpOnly = true,       // Prevents JavaScript access to the cookie

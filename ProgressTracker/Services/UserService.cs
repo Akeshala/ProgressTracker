@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ProgressTracker.ViewModels.Login;
-using ProgressTracker.ViewModels.Subject;
 using Newtonsoft.Json.Linq;
 
 
@@ -67,8 +66,8 @@ namespace ProgressTracker.Services
                 return false;
             }
         }
-
-        public ClaimsPrincipal? GetPrincipalFromToken(string token)
+        
+        public static ClaimsPrincipal? GetPrincipalFromToken(string? token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes("ProgressTrackerKey123456789123456789");
@@ -95,14 +94,13 @@ namespace ProgressTracker.Services
                 return null;
             }
         }
-
-        public string? GetUserIdFromToken(string token)
+        
+        public static string? GetUserIdFromToken(string? token)
         {
             var principal = GetPrincipalFromToken(token);
 
             var userIdClaim = principal?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             return userIdClaim?.Value;
         }
-
     }
 }

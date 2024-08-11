@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProgressTracker.Data;
+using ProgressTracker.Middleware;
 using ProgressTracker.Services;
 using ProgressTracker.Utils;
 
@@ -33,6 +34,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseMiddleware<UserIdMiddleware>(); // Add middleware to the pipeline
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
